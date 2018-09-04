@@ -21,12 +21,12 @@ The broad outline of the presentation is as follows:
 -   `The Web and WebReader Classes`_ includes the web and the parser which produces a web.
 
     -   `The WebReader class`_ which parses the Web structure.
-    
+
     -   `The Tokenizer class`_ which tokenizes the raw input.
-    
+
     -   `The Option Parser Class`_ which tokenizes just the arguments to ``@@d`` and ``@@o``
         commands.
-    
+
 -   `Error class`_ defines an application-specific Error.
 
 -   `Reference Strategy`_ defines ways to manage cross-references among chunks.
@@ -51,25 +51,25 @@ Base Class Definitions
 There are the core classes that define the enduring application objects. These form
 fairly complex hierarchies.
 
--   **Commands**. A ``Command`` contains user input and creates output.  
-    This can be a block of text from the input file, 
-    one of the various kinds of cross reference commands (``@@f``, ``@@m``, or ``@@u``) 
+-   **Commands**. A ``Command`` contains user input and creates output.
+    This can be a block of text from the input file,
+    one of the various kinds of cross reference commands (``@@f``, ``@@m``, or ``@@u``)
     or a reference to a chunk (via the ``@@<``\ *name*\ ``@@>`` sequence.)
 
 -   **Chunks**. A ``Chunk`` is a collection of ``Command`` instances.  This can be
-    either an anonymous chunk that will be sent directly to the output, 
+    either an anonymous chunk that will be sent directly to the output,
     or one the classes of named chunks delimited by the
     structural ``@@d`` or ``@@o`` commands.
 
 There are classes for reading the input. These don't form a complex hierarchy.
 
-The ``Web`` as a whole is a collection of ``Chunk`` instances. It's built by 
+The ``Web`` as a whole is a collection of ``Chunk`` instances. It's built by
 a ``WebReader`` which uses a ``Tokenizer``.
 
 There is a hierarchy for the various kinds of output.
 
 -   **Emitters**. An ``Emitter`` creates an output file, either tangled code or some kind of markup from
-    the chunks that make up the source file.  Two major subclasses are the ``Weaver``, which 
+    the chunks that make up the source file.  Two major subclasses are the ``Weaver``, which
     has a focus on markup output, and ``Tangler`` which has a focus on pure source output.
 
     We have further specialization of the weavers for RST,  HTML or LaTeX. The issue is
@@ -83,7 +83,7 @@ Hovering at the edge of the base class definitions is the Action Class Hierarchy
 It's not an essential part of the base class definitions. But it doesn't seem to
 fit elsewhere
 
-@d Base Class Definitions 
+@d Base Class Definitions
 @{
 @<Error class - defines the errors raised@>
 @<Command class hierarchy - used to describe individual commands@>
@@ -93,7 +93,7 @@ fit elsewhere
 @<Option Parser class - locates optional values on commands@>
 @<WebReader class - parses the input file, building the Web structure@>
 @<Emitter class hierarchy - used to control output files@>
-@<Reference class hierarchy - strategies for references to a chunk@> 
+@<Reference class hierarchy - strategies for references to a chunk@>
 
 @<Action class hierarchy - used to describe basic actions of the application@>
 @}
@@ -127,11 +127,11 @@ writing an output file.  Emitters are created as follows:
 -   A ``Web`` object will create a ``Tangler`` to **tangle** each file.
 
 Since each ``Emitter`` instance is responsible for the details of one file
-type, different subclasses of ``Emitter`` are used when tangling source code files 
-(``Tangler``) and 
+type, different subclasses of ``Emitter`` are used when tangling source code files
+(``Tangler``) and
 weaving files that include source code plus markup (``Weaver``).
 
-Further specialization is required when weaving HTML or LaTeX.  Generally, this is 
+Further specialization is required when weaving HTML or LaTeX.  Generally, this is
 a matter of providing three things:
 
 -   Boilerplate text to replace various pyWeb constructs,
@@ -141,23 +141,23 @@ a matter of providing three things:
 -   A header to provide overall includes or other setup.
 
 
-An additional part of the escape rules can include using a syntax coloring 
+An additional part of the escape rules can include using a syntax coloring
 toolset instead of simply applying escapes.
 
 In the case of **tangle**, the following algorithm is used:
 
     Visit each each output ``Chunk`` (``@@o``), doing the following:
-    
+
     1.  Open the ``Tangler`` instance using the target file name.
 
     2.  Visit each ``Chunk`` directed to the file, calling the chunk's ``tangle()`` method.
-        
+
         1.  Call the Tangler's ``docBegin()`` method.  This sets the Tangler's indents.
 
-        2.  Visit each ``Command``, call the command's ``tangle()`` method.  
+        2.  Visit each ``Command``, call the command's ``tangle()`` method.
             For the text of the chunk, the
             text is written to the tangler using the ``codeBlock()`` method.  For
-            references to other chunks, the referenced chunk is tangled using the 
+            references to other chunks, the referenced chunk is tangled using the
             referenced chunk's ``tangler()`` method.
 
         3.  Call the Tangler's ``docEnd()`` method.  This clears the Tangler's indents.
@@ -171,19 +171,19 @@ In the case of **weave**, the following algorithm is used:
     2.  Visit each each sequential ``Chunk`` (anonymous, ``@@d`` or ``@@o``), doing the following:
 
         1.  Visit each ``Chunk``, calling the Chunk's ``weave()`` method.
-        
-            1.  Call the Weaver's ``docBegin()``, ``fileBegin()`` or ``codeBegin()`` method, 
-                depending on the subclass of Chunk.  For 
-                ``fileBegin()`` and ``codeBegin()``, this writes the header for
-                a code chunk in the weaver's markup language.  
 
-            2.  Visit each ``Command``, call the Command's ``weave()`` method.  
+            1.  Call the Weaver's ``docBegin()``, ``fileBegin()`` or ``codeBegin()`` method,
+                depending on the subclass of Chunk.  For
+                ``fileBegin()`` and ``codeBegin()``, this writes the header for
+                a code chunk in the weaver's markup language.
+
+            2.  Visit each ``Command``, call the Command's ``weave()`` method.
                 For ordinary text, the
                 text is written to the Weaver using the ``codeBlock()`` method.  For
-                references to other chunks, the referenced chunk is woven using 
+                references to other chunks, the referenced chunk is woven using
                 the Weaver's ``referenceTo()`` method.
 
-            3.  Call the Weaver's ``docEnd()``, ``fileEnd()`` or ``codeEnd()`` method.  
+            3.  Call the Weaver's ``docEnd()``, ``fileEnd()`` or ``codeEnd()`` method.
                 For ``fileEnd()`` or ``codeEnd()``, this writes a trailer for
                 a code chunk in the Weaver's markup language.
 
@@ -196,7 +196,7 @@ contains common features factored out of the ``Weaver`` and ``Tangler`` subclass
 
 Inheriting from the Emitter class generally requires overriding one or more
 of the core methods: ``doOpen()``, and ``doClose()``.
-A subclass of Tangler, might override the code writing methods: 
+A subclass of Tangler, might override the code writing methods:
 ``quote()``, ``codeBlock()`` or ``codeFinish()``.
 
 The ``Emitter`` class defines the basic
@@ -211,7 +211,7 @@ directs us to factor the basic open(), close() and write() methods into two step
         self.doOpen() *#overridden by subclasses*
         return self
 
-The *common preparation* section is generally internal 
+The *common preparation* section is generally internal
 housekeeping.  The ``doOpen()`` method would be overridden by subclasses to change the
 basic behavior.
 
@@ -238,9 +238,9 @@ Additionally, an emitter tracks an indentation context used by
 The ``codeBlock()`` method to indent each line written.
 
 :context:
-    the indentation context stack, updated by ``addIndent()``, 
+    the indentation context stack, updated by ``addIndent()``,
     ``clrIndent()`` and ``readdIndent()`` methods.
-        
+
 :lastIndent:
     the last indent used after writing a line of source code
 
@@ -271,7 +271,7 @@ class Emitter:
     @<Emitter core open, close and write@>
     @<Emitter write a block of code@>
     @<Emitter indent control: set, clear and reset@>
-@| Emitter 
+@| Emitter
 @}
 
 The core ``open()`` method tracks the open files.
@@ -314,7 +314,7 @@ def __enter__( self ):
 def __exit__( self, *exc ):
     self.close()
     return False
-    
+
 @| open close write
 @}
 
@@ -338,48 +338,48 @@ def doClose( self ):
 The ``codeBlock()`` method writes several lines of code.  It calls
 the ``quote()`` method to quote each line of code after doing the correct indentation.
 Often, the last line of code is incomplete, so it is left unterminated.
-This last line of code also sets the indentation for any 
+This last line of code also sets the indentation for any
 additional code to be tangled into this section.
 
 ..  important::
 
-    Tab characters confuse the indent algorithm.  Tabs are 
-    not expanded to spaces in this application.  They should be expanded 
+    Tab characters confuse the indent algorithm.  Tabs are
+    not expanded to spaces in this application.  They should be expanded
     prior to creating a ``.w`` file.
 
 The algorithm is as follows:
 
 1.  Save the topmost value of the context stack as the current indent.
 
-2.  Split the block of text on ``'\n'`` boundaries. 
+2.  Split the block of text on ``'\n'`` boundaries.
     There are two cases.
-    
-    -   One line only, no newline. 
-    
-        Write this with the saved lastIndent. 
+
+    -   One line only, no newline.
+
+        Write this with the saved lastIndent.
         The lastIndent is reset to zero since we've only written a fragmentary line.
-    
+
     -   Multiple lines.
 
         1.  Write the first line with saved lastIndent.
-        
-        2.  For each remaining line (except the last), write with the indented text, 
+
+        2.  For each remaining line (except the last), write with the indented text,
             ending with a newline.
-    
-        #.  The string ``split()`` method will put a trailing 
+
+        #.  The string ``split()`` method will put a trailing
             zero-length element in the list if the original block ended with a
-            newline.  We drop this zero length piece to prevent writing a useless fragment 
+            newline.  We drop this zero length piece to prevent writing a useless fragment
             of indent-only after the final ``'\n'``.
-      
-        #.  If the last line has content: Write with the indented text, 
+
+        #.  If the last line has content: Write with the indented text,
             but do not write a trailing ``'\n'``. Set lastIndent to zero because
             the next ``codeBlock()`` will continue this fragmentary line.
-    
+
             If the last line has no content: Write nothing.
             Save the length of the last line as the most recent indent for any ``@@<``\ *name*\ ``@@>``
             reference to.
 
-This feels a bit too complex. Indentation is a feature of a tangling a reference to 
+This feels a bit too complex. Indentation is a feature of a tangling a reference to
 a NamedChunk. It's not really a general feature of emitters or even tanglers.
 
 @d Emitter write a block...
@@ -414,9 +414,9 @@ The ``quote()`` method quotes a single line of source code.
 This is used by Weaver subclasses to transform source into
 a form acceptable by the final weave file format.
 
-In the case of an HTML weaver, the HTML reserved characters -- 
+In the case of an HTML weaver, the HTML reserved characters --
 ``<``, ``>``, ``&``, and ``"`` -- must be replaced in the output
-of code with ``&lt;``, ``&gt;``, ``&amp;``, and ``&quot;``.  
+of code with ``&lt;``, ``&gt;``, ``&amp;``, and ``&quot;``.
 However, since the author's original document sections contain
 HTML these will not be altered.
 
@@ -452,23 +452,23 @@ The ``addIndent()`` method pushes the next indent on the context stack
 using an increment to the previous indent.
 
 When tangling, a "previous" value is set from the indent left over from the
-previous command. This allows ``@@<``\ *name*\ ``@@>`` references to be indented 
+previous command. This allows ``@@<``\ *name*\ ``@@>`` references to be indented
 properly. A tangle must track all nested ``@@d`` contexts to create a proper
 global indent.
 
-Weaving, however, is entirely localized to the block of code. There's no 
+Weaving, however, is entirely localized to the block of code. There's no
 real context tracking. Just "lastIndent" from the previous command's ``codeBlock()``.
 
 The ``setIndent()`` pushes a fixed indent instead adding an increment.
-    
-The ``clrIndent()`` method discards the most recent indent from the context stack.  
+
+The ``clrIndent()`` method discards the most recent indent from the context stack.
 This is used when finished
 tangling a source chunk.  This restores the indent to the prevailing indent.
 
 The ``readdIndent()`` method removes all indent context information and resets the indent
 to a default.
 
-Weaving may use an initial offset. 
+Weaving may use an initial offset.
 It's an additional indent for woven code; not used for tangled code. In particular, RST
 requires this. ``readdIndent()`` uses this initial offset for weaving.
 
@@ -506,10 +506,10 @@ The Weaver class uses a simple set of templates to product RST markup as the def
 Subclasses can introduce other templates to produce HTML or LaTeX output.
 
 Most Weaver languages don't rely on special indentation rules.
-The woven code samples usually start right on the left margin of 
+The woven code samples usually start right on the left margin of
 the source document.  However, the RST markup language does rely
 on extra indentation of code blocks.  For that reason, the weavers
-have an additional indent for code blocks.  This is generally 
+have an additional indent for code blocks.  This is generally
 set to zero, except when generating RST where 4 spaces is good.
 
 The ``Weaver`` subclass extends an ``Emitter`` to **weave** the final
@@ -526,12 +526,12 @@ Class-level variables include the following
 
 :extension:
     The filename extension used by this weaver.
-    
+
 :code_indent:
     The number of spaces to indent code to separate code blocks from
     surrounding text. Mostly this is used by RST where a non-zero value
     is required.
-    
+
 :header:
     Any additional header material this weaver requires.
 
@@ -539,7 +539,7 @@ Instance-level configuration values:
 
 :reference_style:
     Either an instance of ``TransitiveReference()`` or ``SimpleReference()``
-        
+
 @d Imports
 @{import string
 @| string
@@ -549,22 +549,22 @@ Instance-level configuration values:
 @{
 class Weaver( Emitter ):
     """Format various types of XRef's and code blocks when weaving.
-    RST format. 
+    RST format.
     Requires ``..  include:: <isoamsa.txt>``
     and      ``..  include:: <isopub.txt>``
     """
-    extension= ".rst" 
+    extension= ".rst"
     code_indent= 4
     header= """\n..  include:: <isoamsa.txt>\n..  include:: <isopub.txt>\n"""
-    
+
     def __init__( self ):
         super().__init__()
         self.reference_style= None # Must be configured.
-    
+
     @<Weaver doOpen, doClose and addIndent overrides@>
-    
+
     # Template Expansions.
-    
+
     @<Weaver quoted characters@>
     @<Weaver document chunk begin-end@>
     @<Weaver reference summary, used by code chunk and file chunk@>
@@ -572,7 +572,7 @@ class Weaver( Emitter ):
     @<Weaver file chunk begin-end@>
     @<Weaver reference command output@>
     @<Weaver cross reference output methods@>
-@| Weaver 
+@| Weaver
 @}
 
 The ``doOpen()`` method opens the file for writing.  For weavers, the file extension
@@ -592,6 +592,7 @@ def doOpen( self, basename ):
     self.logger.info( "Weaving {!r}".format(self.fileName) )
     self.theFile= open( self.fileName, "w" )
     self.readdIndent( self.code_indent )
+    self.write(self.header)
 def doClose( self ):
     self.theFile.close()
     self.logger.info( "Wrote {:d} lines to {!r}".format(
@@ -611,7 +612,7 @@ We have to quote certain inline markup -- but only when the
 characters are paired in a way that might confuse RST.
 
 We really should use patterns like ```.*?```, ``_.*?_``, ``\*.*?\*``, and ``\|.*?\|``
-to look for paired RST inline markup and quote just these special character occurrences. 
+to look for paired RST inline markup and quote just these special character occurrences.
 
 @d Weaver quoted characters...
 @{
@@ -619,7 +620,7 @@ quoted_chars = [
     # prevent some RST markup from being recognized
     ('\\',r'\\'), # Must be first.
     ('`',r'\`'),
-    ('_',r'\_'), 
+    ('_',r'\_'),
     ('*',r'\*'),
     ('|',r'\|'),
 ]
@@ -627,7 +628,7 @@ quoted_chars = [
 
 The remaining methods apply a chunk to a template.
 
-The ``docBegin()`` and ``docEnd()`` 
+The ``docBegin()`` and ``docEnd()``
 methods are used when weaving a document text chunk.
 Typically, nothing is done before emitting these kinds of chunks.
 However, putting a ``.. line line number`` RST comment is an example
@@ -648,7 +649,7 @@ Each code chunk includes the places where the chunk is referenced.
 ..  note::
 
     This may be one of the rare places where ``for... else:`` could be the correct statement.
-    
+
     Currently, something more complex is used.
 
 @d Weaver reference summary...
@@ -659,7 +660,7 @@ ref_item_template = string.Template( "$fullName (`${seq}`_)" )
 def references( self, aChunk ):
     references= aChunk.references_list( self )
     if len(references) != 0:
-        refList= [ 
+        refList= [
             self.ref_item_template.substitute( seq=s, fullName=n )
             for n,s in references ]
         return self.ref_template.substitute( refList=self.ref_separator.join( refList ) )
@@ -669,12 +670,12 @@ def references( self, aChunk ):
 @}
 
 
-The ``codeBegin()`` method emits the necessary material prior to 
+The ``codeBegin()`` method emits the necessary material prior to
 a chunk of source code, defined with the ``@@d`` command.
 
-The ``codeEnd()`` method emits the necessary material subsequent to 
-a chunk of source code, defined with the ``@@d`` command.  
-Links or cross references to chunks that 
+The ``codeEnd()`` method emits the necessary material subsequent to
+a chunk of source code, defined with the ``@@d`` command.
+Links or cross references to chunks that
 refer to this chunk can be emitted.
 
 
@@ -683,20 +684,20 @@ refer to this chunk can be emitted.
 cb_template = string.Template( "\n..  _`${seq}`:\n..  rubric:: ${fullName} (${seq}) ${concat}\n..  parsed-literal::\n    :class: code\n\n" )
 
 def codeBegin( self, aChunk ):
-    txt = self.cb_template.substitute( 
+    txt = self.cb_template.substitute(
         seq= aChunk.seq,
-        lineNumber= aChunk.lineNumber, 
+        lineNumber= aChunk.lineNumber,
         fullName= aChunk.fullName,
         concat= "=" if aChunk.initial else "+=", # RST Separator
     )
     self.write( txt )
-    
+
 ce_template = string.Template( "\n..\n\n    ..  class:: small\n\n        |loz| *${fullName} (${seq})*. Used by: ${references}\n" )
 
 def codeEnd( self, aChunk ):
-    txt = self.ce_template.substitute( 
+    txt = self.ce_template.substitute(
         seq= aChunk.seq,
-        lineNumber= aChunk.lineNumber, 
+        lineNumber= aChunk.lineNumber,
         fullName= aChunk.fullName,
         references= self.references( aChunk ),
     )
@@ -704,13 +705,13 @@ def codeEnd( self, aChunk ):
 @| codeBegin codeEnd
 @}
 
-The ``fileBegin()`` method emits the necessary material prior to 
+The ``fileBegin()`` method emits the necessary material prior to
 a chunk of source code, defined with the ``@@o`` command.
 A subclass would override this to provide specific text
 for the intended file type.
 
-The ``fileEnd()`` method emits the necessary material subsequent to 
-a chunk of source code, defined with the ``@@o`` command.  
+The ``fileEnd()`` method emits the necessary material subsequent to
+a chunk of source code, defined with the ``@@o`` command.
 
 There shouldn't be a list of references to a file. We assert that this
 list is always empty.
@@ -721,8 +722,8 @@ fb_template = string.Template( "\n..  _`${seq}`:\n..  rubric:: ${fullName} (${se
 
 def fileBegin( self, aChunk ):
     txt= self.fb_template.substitute(
-        seq= aChunk.seq, 
-        lineNumber= aChunk.lineNumber, 
+        seq= aChunk.seq,
+        lineNumber= aChunk.lineNumber,
         fullName= aChunk.fullName,
         concat= "=" if aChunk.initial else "+=", # RST Separator
     )
@@ -733,18 +734,18 @@ fe_template= string.Template( "\n..\n\n    ..  class:: small\n\n        |loz| *$
 def fileEnd( self, aChunk ):
     assert len(self.references( aChunk )) == 0
     txt= self.fe_template.substitute(
-        seq= aChunk.seq, 
-        lineNumber= aChunk.lineNumber, 
+        seq= aChunk.seq,
+        lineNumber= aChunk.lineNumber,
         fullName= aChunk.fullName,
         references= [] )
     self.write( txt )
 @| fileBegin fileEnd
 @}
 
-The ``referenceTo()`` method emits a reference to 
+The ``referenceTo()`` method emits a reference to
 a chunk of source code.  There reference is made with a
 ``@@<``\ *name*\ ``@@>`` reference  within a ``@@d`` or ``@@o`` chunk.
-The references are defined with the ``@@d`` or ``@@o`` commands.  
+The references are defined with the ``@@d`` or ``@@o`` commands.
 A subclass would override this to provide specific text
 for the intended file type.
 
@@ -767,7 +768,7 @@ def referenceTo( self, aName, seq ):
         return self.refto_name_template.substitute( fullName= aName, seq= seq )
     else:
         return self.refto_seq_template.substitute( seq= seq )
-        
+
 def referenceSep( self ):
     """Separator between references."""
     return self.refto_seq_separator
@@ -782,19 +783,19 @@ The ``xrefFoot()`` method puts decoration after cross-reference
 output.  A subclass may override this to change the look of the final
 woven document.
 
-The ``xrefLine()`` method is used for both 
+The ``xrefLine()`` method is used for both
 file and chunk ("macro") cross-references to show a name (either file name
 or chunk name) and a list of chunks that reference the file or chunk.
 
 The ``xrefDefLine()`` method is used for the user identifier cross-reference.
-This shows a name and a list of chunks that 
+This shows a name and a list of chunks that
 reference or define the name.  One of the chunks is identified as the
 defining chunk, all others are referencing chunks.
 
 An ``xrefEmpty()`` is used in the rare case of no user identifiers present.
 
 The default behavior simply writes the Python data structure used
-to represent cross reference information.  A subclass may override this 
+to represent cross reference information.  A subclass may override this
 to change the look of the final woven document.
 
 @d Weaver cross reference...
@@ -821,7 +822,7 @@ def xrefEmpty( self ):
     self.write( self.xref_empty_template.substitute() )
 @}
 
-Cross-reference definition line 
+Cross-reference definition line
 
 @d Weaver cross reference...
 @{
@@ -831,10 +832,10 @@ name_ref_template = string.Template( '`${seq}`_' )
 def xrefDefLine( self, name, defn, refList ):
     templates = { defn: self.name_def_template }
     refTxt= [ templates.get(r,self.name_ref_template).substitute( seq= r )
-        for r in sorted( refList + [defn] ) 
+        for r in sorted( refList + [defn] )
         ]
     # Generic space separator
-    txt= self.xref_item_template.substitute( fullName= name, refList = " ".join(refTxt) ) 
+    txt= self.xref_item_template.substitute( fullName= name, refList = " ".join(refTxt) )
     self.write( txt )
 @| xrefHead xrefFoot xrefLine xrefDefLine
 @}
@@ -855,16 +856,16 @@ class RST(Weaver):
 LaTeX subclass of Weaver
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Experimental, at best. 
+Experimental, at best.
 
-An instance of ``LaTeX`` can be used by the ``Web`` object to 
+An instance of ``LaTeX`` can be used by the ``Web`` object to
 weave an output document.  The instance is created outside the Web, and
 given to the ``weave()`` method of the Web.
 
 ..  parsed-literal::
 
     w= Web()
-    WebReader().load(w,"somefile.w") 
+    WebReader().load(w,"somefile.w")
     weave_latex= LaTeX()
     w.weave( weave_latex )
 
@@ -896,7 +897,7 @@ class LaTeX( Weaver ):
     @<LaTeX references summary at the end of a chunk@>
     @<LaTeX write a line of code@>
     @<LaTeX reference to a chunk@>
-@| LaTeX 
+@| LaTeX
 @}
 
 The LaTeX ``open()`` method opens the woven file by replacing the
@@ -907,7 +908,7 @@ The LaTeX ``codeBegin()`` template writes the header prior to a
 chunk of source code.  It aligns the block to the left, prints an
 italicised header, and opens a preformatted block.
 
-  
+
 @d LaTeX code chunk begin
 @{
 cb_template = string.Template( """\\label{pyweb${seq}}
@@ -923,7 +924,7 @@ a chunk of source code.  This first closes the preformatted block and
 then calls the ``references()`` method to write a reference
 to the chunk that invokes this chunk; finally, it restores paragraph
 indentation.
-  
+
 @d LaTeX code chunk end
 @{
 ce_template= string.Template("""
@@ -960,7 +961,7 @@ The ``references()`` template writes a list of references after a
 chunk of code.  Each reference includes the example number, the title,
 and a reference to the LaTeX section and page numbers on which the
 referring block appears.
-  
+
 @d LaTeX references summary...
 @{
 ref_item_template = string.Template( """
@@ -981,7 +982,7 @@ special formatting is needed, except to avoid ending the preformatted
 block.  Our one compromise is a thin space if the phrase
 ``\\end{Verbatim}`` is used in a code block.
 
-  
+
 @d LaTeX write a line...
 @{
 quoted_chars = [
@@ -1009,7 +1010,7 @@ HTML subclasses of Weaver
 
 This works, but, it's not clear that it should be kept.
 
-An instance of ``HTML`` can be used by the ``Web`` object to 
+An instance of ``HTML`` can be used by the ``Web`` object to
 weave an output document.  The instance is created outside the Web, and
 given to the ``weave()`` method of the Web.
 
@@ -1017,7 +1018,7 @@ given to the ``weave()`` method of the Web.
 
 
     w= Web()
-    WebReader().load(w,"somefile.w") 
+    WebReader().load(w,"somefile.w")
     weave_html= HTML()
     w.weave( weave_html )
 
@@ -1052,7 +1053,7 @@ class HTML( Weaver ):
     @<HTML write a line of code@>
     @<HTML reference to a chunk@>
     @<HTML simple cross reference markup@>
-@| HTML 
+@| HTML
 @}
 
 @d HTML subclass...
@@ -1060,7 +1061,7 @@ class HTML( Weaver ):
 class HTMLShort( HTML ):
     """HTML formatting for XRef's and code blocks when weaving with short references."""
     @<HTML short references summary at the end of a chunk@>
-@| HTML 
+@| HTML
 @}
 
 The ``codeBegin()`` template starts a chunk of code, defined with ``@@d``, providing a label
@@ -1077,7 +1078,7 @@ cb_template= string.Template("""
 @| codeBegin
 @}
 
-The ``codeEnd()`` template ends a chunk of code, providing a HTML tags necessary 
+The ``codeEnd()`` template ends a chunk of code, providing a HTML tags necessary
 to finish the code block visually.  This calls the references method to
 write the list of chunks that reference this chunk.
 
@@ -1103,7 +1104,7 @@ fb_template= string.Template("""<a name="pyweb${seq}"></a>
 @| fileBegin
 @}
 
-The ``fileEnd()`` template ends a chunk of code, providing a HTML tags necessary 
+The ``fileEnd()`` template ends a chunk of code, providing a HTML tags necessary
 to finish the code block visually.  This calls the references method to
 write the list of chunks that reference this chunk.
 
@@ -1117,7 +1118,7 @@ ${references}
 @}
 
 The ``references()`` template writes the list of chunks that refer to this chunk.
-Note that this list could be rather long because of the possibility of 
+Note that this list could be rather long because of the possibility of
 transitive references.
 
 @d HTML references summary...
@@ -1144,7 +1145,7 @@ quoted_chars = [
 @| quoted_chars
 @}
 
-The ``referenceTo()`` template writes a reference to another chunk.  It uses the 
+The ``referenceTo()`` template writes a reference to another chunk.  It uses the
 direct ``write()`` method so that the reference is indented properly with the
 surrounding source code.
 
@@ -1160,13 +1161,13 @@ refto_seq_template = string.Template(
 @}
 
 The ``xrefHead()`` method writes the heading for any of the cross reference blocks created by
-``@@f``, ``@@m``, or ``@@u``.  In this implementation, the cross references are simply unordered lists. 
+``@@f``, ``@@m``, or ``@@u``.  In this implementation, the cross references are simply unordered lists.
 
 The ``xrefFoot()`` method writes the footing for any of the cross reference blocks created by
-``@@f``, ``@@m``, or ``@@u``.  In this implementation, the cross references are simply unordered lists. 
+``@@f``, ``@@m``, or ``@@u``.  In this implementation, the cross references are simply unordered lists.
 
 The ``xrefLine()`` method writes a line for the file or macro cross reference blocks created by
-``@@f`` or ``@@m``.  In this implementation, the cross references are simply unordered lists. 
+``@@f`` or ``@@m``.  In this implementation, the cross references are simply unordered lists.
 
 @d HTML simple cross reference markup
 @{
@@ -1178,7 +1179,7 @@ xref_item_template = string.Template( "<dt>${fullName}</dt><dd>${refList}</dd>\n
 @}
 
 The ``xrefDefLine()`` method writes a line for the user identifier cross reference blocks created by
-@@u.  In this implementation, the cross references are simply unordered lists.  The defining instance 
+@@u.  In this implementation, the cross references are simply unordered lists.  The defining instance
 is included in the correct order with the other instances, but is bold and marked with a bullet (&bull;).
 
 
@@ -1189,10 +1190,10 @@ name_ref_template = string.Template( '<a href="#pyweb${seq}">${seq}</a>' )
 @| xrefDefLine
 @}
 
-The HTMLShort subclass enhances the HTML class to provide short 
+The HTMLShort subclass enhances the HTML class to provide short
 cross references.
 The ``references()`` method writes the list of chunks that refer to this chunk.
-Note that this list could be rather long because of the possibility of 
+Note that this list could be rather long because of the possibility of
 transitive references.
 
 @d HTML short references summary...
@@ -1210,13 +1211,13 @@ instance of ``Tangler`` is given to the ``Web`` class ``tangle()`` method.
 ..  parsed-literal::
 
     w= Web()
-    WebReader().load(w,"somefile.w") 
+    WebReader().load(w,"somefile.w")
     t= Tangler()
     w.tangle( t )
 
 
 The ``Tangler`` subclass extends an Emitter to **tangle** the various
-program source files.  The superclass is used to simply emit correctly indented 
+program source files.  The superclass is used to simply emit correctly indented
 source code and do very little else that could corrupt or alter the output.
 
 Language-specific subclasses could be used to provide additional decoration.
@@ -1231,10 +1232,10 @@ There are three configurable values:
 
 :comment_start:
     If not None, this is the leading character for a line-number comment
-    
+
 :comment_end:
     This is the trailing character for a line-number comment
-    
+
 :include_line_numbers:
     Show the source line numbers in the output via additional comments.
 
@@ -1250,7 +1251,7 @@ class Tangler( Emitter ):
     @<Tangler doOpen, and doClose overrides@>
     @<Tangler code chunk begin@>
     @<Tangler code chunk end@>
-@| Tangler 
+@| Tangler
 @}
 
 The default for all tanglers is to create the named file.
@@ -1294,14 +1295,14 @@ prevailing indent at the start of the ``@@<`` reference command.
 def codeBegin( self, aChunk ):
     self.log_indent.debug( "<tangle {!s}:".format(aChunk.fullName) )
     if self.include_line_numbers and self.comment_start is not None:
-        self.write( "\n{start!s} Web: {filename!s}:{line:d} {fullname!s}({seq:d}) {end!s}\n".format( 
-            start=  self.comment_start, 
-            webfilename= aChunk.web().webFileName, 
+        self.write( "\n{start!s} Web: {filename!s}:{line:d} {fullname!s}({seq:d}) {end!s}\n".format(
+            start=  self.comment_start,
+            webfilename= aChunk.web().webFileName,
             filename= aChunk.fileName,
-            fullname= aChunk.fullName, 
+            fullname= aChunk.fullName,
             name= aChunk.name,
-            seq= aChunk.seq, 
-            line= aChunk.lineNumber, 
+            seq= aChunk.seq,
+            line= aChunk.lineNumber,
             end= self.comment_end) )
 @| codeBegin
 @}
@@ -1327,12 +1328,12 @@ instance of ``TanglerMake`` is given to the ``Web`` class ``tangle()`` method.
 ..  parsed-literal::
 
     w= Web()
-    WebReader().load(w,"somefile.w") 
+    WebReader().load(w,"somefile.w")
     t= TanglerMake()
     w.tangle( t )
 
 The ``TanglerMake`` subclass extends ``Tangler`` to make the source files
-more make-friendly.  This subclass of ``Tangler`` 
+more make-friendly.  This subclass of ``Tangler``
 does not **touch** an output file
 where there is no change.  This is helpful when **pyWeb**\ 's output is
 sent to **make**.  Using ``TanglerMake`` assures that only files with real changes
@@ -1357,7 +1358,7 @@ class TanglerMake( Tangler ):
         self.tempname= None
     @<TanglerMake doOpen override, using a temporary file@>
     @<TanglerMake doClose override, comparing temporary to original@>
-@| TanglerMake 
+@| TanglerMake
 @}
 
 A ``TanglerMake`` creates a temporary file to collect the
@@ -1375,10 +1376,10 @@ def doOpen( self, aFile ):
 @| doOpen
 @}
 
-If there is a previous file: compare the temporary file and the previous file.  
+If there is a previous file: compare the temporary file and the previous file.
 
 If there was no previous file or the files are different: rename temporary to replace previous;
-else there was a previous file and the files were the same: unlink temporary and discard it.  
+else there was a previous file and the files were the same: unlink temporary and discard it.
 
 This preserves the original (with the original date
 and time) if nothing has changed.
@@ -1398,7 +1399,7 @@ def doClose( self ):
     else:
         # Windows requires the original file name be removed first.
         self.checkPath()
-        try: 
+        try:
             os.remove( self.fileName )
         except OSError as e:
             pass # Doesn't exist.  Could check for errno.ENOENT
@@ -1422,7 +1423,7 @@ are used to examine the text of the ``Command`` instances within
 the chunk.
 
 A ``Chunk`` instance is created by the ``WebReader`` as the input file is parsed.
-Each ``Chunk`` instance has one or more pieces of the original input text.  
+Each ``Chunk`` instance has one or more pieces of the original input text.
 This text can be program source, a reference command, or the documentation source.
 
 @d Chunk class hierarchy...
@@ -1433,17 +1434,17 @@ This text can be program source, a reference command, or the documentation sourc
 @<NamedDocumentChunk class@>
 @}
 
-The ``Chunk`` class is both the superclass for this hierarchy and the implementation 
-for anonymous chunks.  An anonymous chunk is always documentation in the 
+The ``Chunk`` class is both the superclass for this hierarchy and the implementation
+for anonymous chunks.  An anonymous chunk is always documentation in the
 target markup language.  No transformation is ever done on anonymous chunks.
 
-A ``NamedChunk`` is a chunk created with a ``@@d`` command.  
+A ``NamedChunk`` is a chunk created with a ``@@d`` command.
 This is a chunk of source programming language, bracketed with ``@@{`` and ``@@}``.
 
-An ``OutputChunk`` is a named chunk created with a ``@@o`` command.  
+An ``OutputChunk`` is a named chunk created with a ``@@o`` command.
 This must be a chunk of source programming language, bracketed with ``@@{`` and ``@@}``.
 
-A ``NamedDocumentChunk`` is a named chunk created with a ``@@d`` command.  
+A ``NamedDocumentChunk`` is a named chunk created with a ``@@d`` command.
 This is a chunk of documentation in the target markup language,
 bracketed with ``@@[`` and ``@@]``.
 
@@ -1452,9 +1453,9 @@ Chunk Superclass
 
 An instance of the ``Chunk`` class has a life that includes four important events:
 
--   creation, 
+-   creation,
 
--   cross-reference, 
+-   cross-reference,
 
 -   weave,
 
@@ -1477,8 +1478,8 @@ The basic outline for creating a ``Chunk`` instance is as follows:
 
 Before weaving or tangling, a cross reference is created for all
 user identifiers in all of the ``Chunk`` instances.
-This is done by: (1) visit each ``Chunk`` and call the 
-``getUserIDRefs()`` method to gather all identifiers; (2) for each identifier, 
+This is done by: (1) visit each ``Chunk`` and call the
+``getUserIDRefs()`` method to gather all identifiers; (2) for each identifier,
 visit each ``Chunk`` and call the ``searchForRE()`` method to find uses of
 the identifier.
 
@@ -1506,7 +1507,7 @@ and ``appendText()`` methods used by all of the various ``Chunk`` subclasses.
 
 
 When a ``@@@@`` construct is located in the input stream, the stream contains
-three text tokens: material before the ``@@@@``, the ``@@@@``, 
+three text tokens: material before the ``@@@@``, the ``@@@@``,
 and the material after the ``@@@@``.
 These three tokens are reassembled into a single block of text.  This reassembly
 is accomplished by changing the chunk's state so that the next ``TextCommand`` is
@@ -1527,14 +1528,14 @@ only handle document text.  The ``NamedChunk`` subclass that handles program sou
 will override this method to create a different command type.  The ``makeContent()`` method
 creates the appropriate ``Command`` instance for this ``Chunk`` subclass.
 
-The ``weave()`` method of an anonymous ``Chunk`` uses the weaver's 
+The ``weave()`` method of an anonymous ``Chunk`` uses the weaver's
 ``docBegin()`` and ``docEnd()``
-methods to insert text that is source markup.  Other subclasses will override this to 
+methods to insert text that is source markup.  Other subclasses will override this to
 use different ``Weaver`` methods for different kinds of text.
 
 A ``Chunk`` has a **Strategy** object which is a subclass of ``Reference``.  This is
-either an instance of ``SimpleReference`` or ``TransitiveReference``.  
-A ``SimpleRerence`` does no additional processing, and locates the proximate reference to 
+either an instance of ``SimpleReference`` or ``TransitiveReference``.
+A ``SimpleRerence`` does no additional processing, and locates the proximate reference to
 this chunk.  The ``TransitiveReference`` walks "up" the web toward top-level file
 definitions that reference this ``Chunk``.
 
@@ -1549,7 +1550,7 @@ The ``Chunk`` constructor initializes the following instance variables:
     is used the list of user identifiers associated with
     this chunk.  This attribute is always ``None`` for this class.
     The ``NamedChunk`` subclass, however, can have user identifiers.
-    
+
 :initial:
     is True if this is the first
     definition (display with ``'='``) or a subsequent definition (display with ``'+='``).
@@ -1557,10 +1558,10 @@ The ``Chunk`` constructor initializes the following instance variables:
 :web:
     A weakref to the web which contains this Chunk. We want to inherit information
     from the ``Web`` overall.
-    
+
 :fileName:
     The file which contained this chunk's initial ``@@o`` or ``@@d``.
-    
+
 :name:
     has the name of the chunk.  This is '' for anonymous chunks.
 
@@ -1589,7 +1590,7 @@ class Chunk:
         self.fileName= ''
         self.referencedBy= [] # Chunks which reference this chunk.  Ideally just one.
         self.references= [] # Names that this chunk references
-                
+
     def __str__( self ):
         return "\n".join( map( str, self.commands ) )
     def __repr__( self ):
@@ -1597,12 +1598,12 @@ class Chunk:
     @<Chunk append a command@>
     @<Chunk append text@>
     @<Chunk add to the web@>
-    
+
     @<Chunk generate references from this Chunk@>
     @<Chunk superclass make Content definition@>
     @<Chunk examination: starts with, matches pattern@>
     @<Chunk references to this Chunk@>
-    
+
     @<Chunk weave this Chunk into the documentation@>
     @<Chunk tangle this Chunk into a code file@>
     @<Chunk indent adjustments@>
@@ -1621,10 +1622,10 @@ def append( self, command ):
 @}
 
 The ``appendText()`` method appends a ``TextCommand`` to this chunk,
-or it concatenates it to the most recent ``TextCommand``.  
+or it concatenates it to the most recent ``TextCommand``.
 
 When an ``@@@@`` construct is located, the ``appendText()`` method is
-used to accumulate this character.  This means that it will be appended to 
+used to accumulate this character.  This means that it will be appended to
 any previous TextCommand, or  new TextCommand will be built.
 
 The reason for appending is that a ``TextCommand`` has an implicit indentation.  The "@@" cannot
@@ -1719,11 +1720,11 @@ The chunk search in the ``searchForRE()`` method parallels weaving and tangling 
 The operation is delegated to each ``Command`` instance within the ``Chunk`` instance.
 
 The ``genReferences()`` method visits each ``Command`` instance inside this chunk;
-a ``Command`` will yield the references.  
+a ``Command`` will yield the references.
 
 Note that an exception may be raised by this operation if a referenced
-``Chunk`` does not actually exist.  If a reference ``Command`` does raise an error, 
-we append this ``Chunk`` information and reraise the error with the additional 
+``Chunk`` does not actually exist.  If a reference ``Command`` does raise an error,
+we append this ``Chunk`` information and reraise the error with the additional
 context information.
 
 
@@ -1752,7 +1753,7 @@ The Weaver pushed it into the Web so that it is available for each ``Chunk``.
 @{
 def references_list( self, theWeaver ):
     """Extract name, sequence from Chunks into a list."""
-    return [ (c.name, c.seq) 
+    return [ (c.name, c.seq)
         for c in theWeaver.reference_style.chunkReferencedBy( self ) ]
 @}
 
@@ -1760,14 +1761,14 @@ The ``weave()`` method weaves this chunk into the final document as follows:
 
 1.  Call the ``Weaver`` class ``docBegin()`` method.  This method does nothing for document content.
 
-2.  Visit each ``Command`` instance: call the ``Command`` instance ``weave()`` method to 
+2.  Visit each ``Command`` instance: call the ``Command`` instance ``weave()`` method to
     emit the content of the ``Command`` instance
 
 3.  Call the ``Weaver`` class ``docEnd()`` method.  This method does nothing for document content.
 
 Note that an exception may be raised by this action if a referenced
-``Chunk`` does not actually exist.  If a reference ``Command`` does raise an error, 
-we append this ``Chunk`` information and reraise the error with the additional 
+``Chunk`` does not actually exist.  If a reference ``Command`` does raise an error,
+we append this ``Chunk`` information and reraise the error with the additional
 context information.
 
 
@@ -1808,7 +1809,7 @@ left margin by forcing the local indent to zero.
 @{
 def reference_indent( self, aWeb, aTangler, amount ):
     aTangler.addIndent( amount )  # Or possibly set indent to local zero.
-    
+
 def reference_dedent( self, aWeb, aTangler ):
     aTangler.clrIndent()
 @}
@@ -1820,19 +1821,19 @@ A ``NamedChunk`` is created and used almost identically to an anonymous ``Chunk`
 The most significant difference is that a name is provided when the ``NamedChunk`` is created.
 This name is used by the ``Web`` to organize the chunks.
 
-A ``NamedChunk`` is created with a ``@@d`` or ``@@o`` command.  
+A ``NamedChunk`` is created with a ``@@d`` or ``@@o`` command.
 A ``NamedChunk`` contains programming language source
 when the brackets are ``@@{`` and ``@@}``.  A
 separate subclass of ``NamedDocumentChunk`` is used when
 the brackets are ``@@[`` and ``@@]``.
 
 A ``NamedChunk`` can be both tangled into the output program files, and
-woven into the output document file. 
+woven into the output document file.
 
-The ``weave()`` method of a ``NamedChunk`` uses the Weaver's 
+The ``weave()`` method of a ``NamedChunk`` uses the Weaver's
 ``codeBegin()`` and ``codeEnd()``
 methods to insert text that is program source and requires additional
-markup to make it stand out from documentation.  Other subclasses can override this to 
+markup to make it stand out from documentation.  Other subclasses can override this to
 use different ``Weaver`` methods for different kinds of text.
 
 By inheritance from the superclass, this class indents. A separate subclass provides a no-indent
@@ -1841,7 +1842,7 @@ implementation of a ``NamedChunk``.
 This class introduces some additional attributes.
 
 :fullName:
-    is the full name of the chunk.  It's possible for a 
+    is the full name of the chunk.  It's possible for a
     chunk to be an abbreviated forward reference; full names cannot be resolved
     until all chunks have been seen.
 
@@ -1850,11 +1851,11 @@ This class introduces some additional attributes.
 
 :refCount:
     is the count of references to this chunk.  If this is
-    zero, the chunk is unused; if this is more than one, this chunk is 
-    multiply used.  Either of these conditions is a possible error in the input. 
+    zero, the chunk is unused; if this is more than one, this chunk is
+    multiply used.  Either of these conditions is a possible error in the input.
     This is set by the ``usedBy()`` method.
 
-:name: 
+:name:
     has the name of the chunk.  Names can be abbreviated.
 
 !seq:
@@ -1964,7 +1965,7 @@ The ``tangle()`` method tangles this chunk into the final document as follows:
 3.  call the ``Tangler`` class ``codeEnd()`` method to restore indents.
 
 If a ``ReferenceCommand`` does raise an error during tangling,
-we append this Chunk information and reraise the error with the additional 
+we append this Chunk information and reraise the error with the additional
 context information.
 
 
@@ -1987,7 +1988,7 @@ def tangle( self, aWeb, aTangler ):
 @| tangle
 @}
 
-There's a second variation on NamedChunk, one that doesn't indent based on 
+There's a second variation on NamedChunk, one that doesn't indent based on
 context. It simply sets an indent at the left margin.
 
 @d NamedChunk class
@@ -1996,25 +1997,25 @@ class NamedChunk_Noindent( NamedChunk ):
     """Named piece of input file: will be output as both tangler and weaver."""
     def reference_indent( self, aWeb, aTangler, amount ):
         aTangler.setIndent( 0 )
-    
+
     def reference_dedent( self, aWeb, aTangler ):
         aTangler.clrIndent()
 @}
-    
+
 OutputChunk class
 ~~~~~~~~~~~~~~~~~~~
 
 A ``OutputChunk`` is created and used identically to a ``NamedChunk``.
-The difference between this class and the parent class is the decoration of 
+The difference between this class and the parent class is the decoration of
 the markup when weaving.
 
-The ``OutputChunk`` class is a subclass of ``NamedChunk`` that handles 
-file output chunks defined with ``@@o``. 
+The ``OutputChunk`` class is a subclass of ``NamedChunk`` that handles
+file output chunks defined with ``@@o``.
 
-The ``weave()`` method of a ``OutputChunk`` uses the Weaver's 
+The ``weave()`` method of a ``OutputChunk`` uses the Weaver's
 ``fileBegin()`` and ``fileEnd()``
 methods to insert text that is program source and requires additional
-markup to make it stand out from documentation.  Other subclasses could override this to 
+markup to make it stand out from documentation.  Other subclasses could override this to
 use different ``Weaver`` methods for different kinds of text.
 
 All other methods, including the tangle method are identical to ``NamedChunk``.
@@ -2030,7 +2031,7 @@ class OutputChunk( NamedChunk ):
     @<OutputChunk add to the web@>
     @<OutputChunk weave@>
     @<OutputChunk tangle@>
-@| OutputChunk 
+@| OutputChunk
 @}
 
 The ``webAdd()`` method adds this chunk to the given document ``Web``.
@@ -2058,7 +2059,7 @@ These chunks of documentation are never tangled.  Any attempt is an
 error.
 
 If a ``ReferenceCommand`` does raise an error during weaving,
-we append this ``Chunk`` information and reraise the error with the additional 
+we append this ``Chunk`` information and reraise the error with the additional
 context information.
 
 
@@ -2092,14 +2093,14 @@ A ``NamedDocumentChunk`` is created and used identically to a ``NamedChunk``.
 The difference between this class and the parent class is that this chunk
 is only woven when referenced.  The original definition is silently skipped.
 
-The ``NamedDocumentChunk`` class is a subclass of ``NamedChunk`` that handles 
-named chunks defined with ``@@d`` and the ``@@[``\ ...\ ``@@]`` delimiters.  
+The ``NamedDocumentChunk`` class is a subclass of ``NamedChunk`` that handles
+named chunks defined with ``@@d`` and the ``@@[``\ ...\ ``@@]`` delimiters.
 These are woven slightly
 differently, since they are document source, not programming language source.
 
 We're not as interested in the cross reference of named document chunks.
 They can be used multiple times or never.  They are expected to be referenced
-by anonymous chunks.  While this chunk subclass participates in this data 
+by anonymous chunks.  While this chunk subclass participates in this data
 gathering, it is ignored for reporting purposes.
 
 All other methods, including the tangle method are identical to ``NamedChunk``.
@@ -2117,13 +2118,13 @@ class NamedDocumentChunk( NamedChunk ):
 @}
 
 The ``weave()`` method quietly ignores this chunk in the document.
-A named document chunk is only included when it is referenced 
+A named document chunk is only included when it is referenced
 during weaving of another chunk (usually an anonymous document
 chunk).
 
 The ``weaveReferenceTo()`` method inserts the content of this
 chunk into the output document.  This is done in response to a
-``ReferenceCommand`` in another chunk.  
+``ReferenceCommand`` in another chunk.
 The ``weaveShortReferenceTo()`` method calls the ``weaveReferenceTo()``
 to insert the entire chunk.
 
@@ -2159,13 +2160,13 @@ various ``@@*x*`` strings in the file.  There are several subclasses of ``Comman
 each used to describe a different command or block of text in the input.
 
 
-All instances of the ``Command`` class are created by a ``WebReader`` instance.  
+All instances of the ``Command`` class are created by a ``WebReader`` instance.
 In this case, a ``WebReader`` can be thought of as a factory for ``Command`` instances.
 Each ``Command`` instance is appended to the sequence of commands that
 belong to a ``Chunk``.  A chunk may be as small as a single command, or a long sequence
 of commands.
 
-Each ``Command`` instance responds to methods to examine the content, gather 
+Each ``Command`` instance responds to methods to examine the content, gather
 cross reference information and tangle a file or weave the final document.
 
 
@@ -2204,18 +2205,18 @@ of ``WebReader``.
 The ``Command`` superclass provides the parent class definition
 for all of the various command types.  The most common command
 is a block of text.
-For tangling it is presented with no changes. For weaving, 
+For tangling it is presented with no changes. For weaving,
 quoting is used to make it work nicely with the given markup language.
 
 The next most
-common command is a reference to a chunk. This is woven as a 
-mark-up reference: a link. It is tangled as an expansion of the source 
+common command is a reference to a chunk. This is woven as a
+mark-up reference: a link. It is tangled as an expansion of the source
 code.
 
 Additional methods include the following:
 
 -   The ``startswith()`` method examines any source text to see if
-    it begins with the given prefix text. 
+    it begins with the given prefix text.
 
 -   The ``searchForRE()`` method examines any source text to see if
     it matches the given regular expression, usually a match for a user identifier.
@@ -2224,9 +2225,9 @@ Additional methods include the following:
     which returns reference made by the command to the parent chunk.
 
 -   The ``weave()`` method weaves this into the output.  If a document text
-    command, it is emitted directly; if a program source code command, 
+    command, it is emitted directly; if a program source code command,
     markup is applied.  In the case of cross-reference commands,
-    the actual cross-reference content is emitted.  In the case of 
+    the actual cross-reference content is emitted.  In the case of
     reference commands, they are woven as a reference to a named
     chunk.
 
@@ -2281,12 +2282,12 @@ def tangle( self, aWeb, aTangler ):
 TextCommand class
 ~~~~~~~~~~~~~~~~~~
 
-A ``TextCommand`` is created by a ``Chunk`` or a ``NamedDocumentChunk`` when a 
+A ``TextCommand`` is created by a ``Chunk`` or a ``NamedDocumentChunk`` when a
 ``WebReader`` calls the chunk's ``appendText()`` method.
 
 This Command participates in cross reference creation, weaving and tangling.  When it is
 created, the source line number is provided so that this text can be tied back
-to the source document. 
+to the source document.
 
 An instance of the ``TextCommand`` class is a block of document text.  It can originate
 in an anonymous block or a named chunk delimited with ``@@[`` and ``@@]``.
@@ -2327,11 +2328,11 @@ class TextCommand( Command ):
 CodeCommand class
 ~~~~~~~~~~~~~~~~~~
 
-A ``CodeCommand`` is created by a ``NamedChunk`` when a 
+A ``CodeCommand`` is created by a ``NamedChunk`` when a
 ``WebReader`` calls the ``appendText()`` method.
 The Command participates in cross reference creation, weaving and tangling.  When it is
 created, the source line number is provided so that this text can be tied back
-to the source document. 
+to the source document.
 
 
 An instance of the ``CodeCommand`` class is a block of program source code text.
@@ -2339,7 +2340,7 @@ It can originate in a named chunk (``@@d``) with a ``@@{`` and ``@@}`` delimiter
 Or it can be a file output chunk (``@@o``).
 
 
-It uses the ``codeBlock()`` methods of a ``Weaver`` or ``Tangler``.  The weaver will 
+It uses the ``codeBlock()`` methods of a ``Weaver`` or ``Tangler``.  The weaver will
 insert appropriate markup for this code.  The tangler will assure that the prevailing
 indentation is maintained.
 
@@ -2358,7 +2359,7 @@ class CodeCommand( TextCommand ):
 XrefCommand superclass
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-An ``XrefCommand`` is created by the ``WebReader`` when any of the 
+An ``XrefCommand`` is created by the ``WebReader`` when any of the
 ``@@f``, ``@@m``, ``@@u`` commands are found in the input stream.
 The Command is then appended to the current Chunk being built by the WebReader.
 
@@ -2379,7 +2380,7 @@ by the following algorithm:
 If this command winds up in a tangle action, that use
 is illegal.  An exception is raised and processing stops.
 
- 
+
 @d XrefCommand superclass...
 @{
 class XrefCommand( Command ):
@@ -2399,7 +2400,7 @@ class XrefCommand( Command ):
 FileXrefCommand class
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-A ``FileXrefCommand`` is created by the ``WebReader`` when the 
+A ``FileXrefCommand`` is created by the ``WebReader`` when the
 ``@@f`` command is found in the input stream.
 The Command is then appended to the current Chunk being built by the WebReader.
 
@@ -2421,7 +2422,7 @@ class FileXrefCommand( XrefCommand ):
 MacroXrefCommand class
 ~~~~~~~~~~~~~~~~~~~~~~
 
-A ``MacroXrefCommand`` is created by the ``WebReader`` when the 
+A ``MacroXrefCommand`` is created by the ``WebReader`` when the
 ``@@m`` command is found in the input stream.
 The Command is then appended to the current Chunk being built by the WebReader.
 
@@ -2443,13 +2444,13 @@ class MacroXrefCommand( XrefCommand ):
 UserIdXrefCommand class
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-A ``MacroXrefCommand`` is created by the ``WebReader`` when the 
+A ``MacroXrefCommand`` is created by the ``WebReader`` when the
 ``@@u`` command is found in the input stream.
 The Command is then appended to the current Chunk being built by the WebReader.
 
 The ``UserIdXrefCommand`` class weave method gets the
-user identifier cross reference information from the 
-overall web instance.  It then formats this line using the following 
+user identifier cross reference information from the
+overall web instance.  It then formats this line using the following
 algorithm, which is similar to the algorithm in the ``XrefCommand`` superclass.
 
 1.  Use the ``Weaver`` class ``xrefHead()`` method to emit the cross-reference header.
@@ -2484,11 +2485,11 @@ ReferenceCommand class
 
 A ``ReferenceCommand`` instance is created by a ``WebReader`` when
 a ``@@<``\ *name*\ ``@@>`` construct in is found in the input stream.  This is attached
-to the current ``Chunk`` being built by the WebReader.  
- 
+to the current ``Chunk`` being built by the WebReader.
+
 
 During a weave, this creates a markup reference to
-another ``NamedChunk``.  During tangle, this actually includes the ``NamedChunk`` 
+another ``NamedChunk``.  During tangle, this actually includes the ``NamedChunk``
 at this point in the tangled output file.
 
 
@@ -2497,7 +2498,7 @@ of a ``ReferenceCommand``.
 
 
 :refTo:
-    the name of the chunk to which this refers, possibly 
+    the name of the chunk to which this refers, possibly
     elided with a trailing ``'...'``.
 
 :fullName:
@@ -2523,7 +2524,7 @@ class ReferenceCommand( Command ):
     @<ReferenceCommand refers to a chunk@>
     @<ReferenceCommand weave a reference to a chunk@>
     @<ReferenceCommand tangle a referenced chunk@>
-@| ReferenceCommand 
+@| ReferenceCommand
 @}
 
 The ``resolve()`` method queries the overall ``Web`` instance for the full
@@ -2543,7 +2544,7 @@ def resolve( self, aWeb ):
 
 The ``ref()`` method is a request that is delegated by a ``Chunk``;
 it resolves the reference this Command makes within the containing Chunk.
-When the Chunk iterates through the Commands, it can accumulate a list of 
+When the Chunk iterates through the Commands, it can accumulate a list of
 Chinks to which it refers.
 
 
@@ -2583,10 +2584,10 @@ Chunk is a no-indent Chunk.
 def tangle( self, aWeb, aTangler ):
     """Create source code."""
     self.resolve( aWeb )
-    
-    self.logger.debug( "Indent {!r} + {!r}".format(aTangler.context, self.chunk.previous_command.indent()) )    
+
+    self.logger.debug( "Indent {!r} + {!r}".format(aTangler.context, self.chunk.previous_command.indent()) )
     self.chunk.reference_indent( aWeb, aTangler, self.chunk.previous_command.indent() )
-    
+
     self.logger.debug( "Tangling chunk {!r}".format(self.fullName) )
     if len(self.chunkList) != 0:
         for p in self.chunkList:
@@ -2605,7 +2606,7 @@ The Reference Strategy has two implementations.  An instance
 of this is injected into each Chunk by the Web.  By injecting this
 algorithm, we assure that:
 
-(1) each Chunk can produce all relevant reference information and 
+(1) each Chunk can produce all relevant reference information and
 
 (2) a simple configuration change can be applied to the document.
 
@@ -2617,7 +2618,7 @@ The superclass is an abstract class that defines the interface for
 this object.
 
 
-@d Reference class hierarchy... 
+@d Reference class hierarchy...
 @{
 class Reference:
     def __init__( self ):
@@ -2632,8 +2633,8 @@ SimpleReference Class
 
 The SimpleReference subclass does the simplest version of resolution. It returns
 the ``Chunks`` referenced.
-    
-@d Reference class hierarchy... 
+
+@d Reference class hierarchy...
 @{
 class SimpleReference( Reference ):
     def chunkReferencedBy( self, aChunk ):
@@ -2650,7 +2651,7 @@ references to this Chunk.
 This requires walking through the ``Web`` to locate "parents" of each referenced
 ``Chunk``.
 
-@d Reference class hierarchy... 
+@d Reference class hierarchy...
 @{
 class TransitiveReference( Reference ):
     def chunkReferencedBy( self, aChunk ):
@@ -2674,10 +2675,10 @@ Error class
 
 An ``Error`` is raised whenever processing cannot continue.  Since it
 is a subclass of Exception, it takes an arbitrary number of arguments.  The
-first should be the basic message text.  Subsequent arguments provide 
+first should be the basic message text.  Subsequent arguments provide
 additional details.  We will try to be sure that
 all of our internal exceptions reference a specific chunk, if possible.
-This means either including the chunk as an argument, or catching the 
+This means either including the chunk as an argument, or catching the
 exception and appending the current chunk to the exception's arguments.
 
 The Python ``raise`` statement takes an instance of ``Error`` and passes it
@@ -2700,7 +2701,7 @@ A typical exception-handling suite might look like this:
     except Exception as w:
         print( w.args ) # this is some other Python Exception
 
-The ``Error`` class is a subclass of ``Exception`` used to differentiate 
+The ``Error`` class is a subclass of ``Exception`` used to differentiate
 application-specific
 exceptions from other Python exceptions.  It does no additional processing,
 but merely creates a distinct class to facilitate writing ``except`` statements.
@@ -2714,32 +2715,32 @@ class Error( Exception ): pass
 The Web and WebReader Classes
 -----------------------------
 
-The overall web of chunks is carried in a 
-single instance of the ``Web`` class that is the principle parameter for the weaving and tangling actions.  
+The overall web of chunks is carried in a
+single instance of the ``Web`` class that is the principle parameter for the weaving and tangling actions.
 Broadly, the functionality of a Web can be separated into several areas.
 
 It supports  construction methods used by ``Chunks`` and ``WebReader``.
 
-It also supports "enrichment" of the web, once all the Chunks are known. 
-This is a stateful update to the web.  Each Chunk is updated with Chunk 
+It also supports "enrichment" of the web, once all the Chunks are known.
+This is a stateful update to the web.  Each Chunk is updated with Chunk
 references it makes as well as Chunks which reference it.
 
 It supports ``Chunk`` cross-reference methods that traverse this enriched data.
 This includes a kind of validity check to be sure that everything is used once
-and once only. 
+and once only.
 
 More importantly, it supports tangle and weave operations.
 
-Fundamentally, a ``Web`` is a hybrid list-dictionary.  
+Fundamentally, a ``Web`` is a hybrid list-dictionary.
 
--   It's a mapping of chunks that also offers a 
+-   It's a mapping of chunks that also offers a
     moderately sophisticated
-    lookup, including exact match for a chunk name and an approximate match for a chunk name. 
+    lookup, including exact match for a chunk name and an approximate match for a chunk name.
     There are several methods to  resolve references among chunks.
 
--   It's a sequence that retains all chunks in order, also. 
+-   It's a sequence that retains all chunks in order, also.
     It may be a good candidate to be an ``OrderedDict``, but there are multiple keys. Both Chunk
-    names and chunk numbers are used. 
+    names and chunk numbers are used.
 
 A web instance has a number of attributes.
 
@@ -2752,13 +2753,13 @@ A web instance has a number of attributes.
     is preserved, we keep all chunks in a master sequential list.
 
 :output:
-    the ``@@o`` named ``OutputChunk`` chunks.  
-    Each element of this  dictionary is a sequence of chunks that have the same name. 
+    the ``@@o`` named ``OutputChunk`` chunks.
+    Each element of this  dictionary is a sequence of chunks that have the same name.
     The first is the initial definition (marked with "="), all others a second definitions
     (marked with "+=").
 
 :named:
-    the ``@@d`` named ``NamedChunk`` chunks.  Each element of this 
+    the ``@@d`` named ``NamedChunk`` chunks.  Each element of this
     dictionary is a sequence of chunks that have the same name.  The first is the
     initial definition (marked with "="), all others a second definitions
     (marked with "+=").
@@ -2770,14 +2771,14 @@ A web instance has a number of attributes.
 !sequence:
     is used to assign a unique sequence number to each
     named chunk.
-    
+
 @d Web class...
 @{
 class Web:
     """The overall Web of chunks."""
     def __init__( self ):
         self.webFileName= None
-        self.chunkSeq= [] 
+        self.chunkSeq= []
         self.output= {} # Map filename to Chunk
         self.named= {} # Map chunkname to Chunk
         self.sequence= 0
@@ -2791,7 +2792,7 @@ class Web:
     @<Web determination of the language from the first chunk@>
     @<Web tangle the output files@>
     @<Web weave the output document@>
-@| Web 
+@| Web
 @}
 
 Web Construction
@@ -2836,7 +2837,7 @@ The algorithm for the ``addDefName()`` method, then is as follows:
 
 1.  Use the ``fullNameFor()`` method to locate the full name.
 
-2.  If no full name was found (the result of ``fullNameFor()`` ends with ``'...'``), 
+2.  If no full name was found (the result of ``fullNameFor()`` ends with ``'...'``),
     ignore this name as an abbreviation with no definition.
 
 3.  If this is a full name and the name was not in the ``named`` mapping, add this full name to the mapping.
@@ -2844,25 +2845,25 @@ The algorithm for the ``addDefName()`` method, then is as follows:
 
 
 This name resolution approach presents a problem when a chunk's first definition
-uses an abbreviated name.  
+uses an abbreviated name.
 
 ..  note:: Improved use case needed.
 
-    We can be more flexible about assembling the web if we 
+    We can be more flexible about assembling the web if we
     tolerate "..." elipsis as the initial use of a name.
-        
-    We have to fold the abbreviated name(s) 
+
+    We have to fold the abbreviated name(s)
     into the Web. Prior to tangling, we have to
     resolve the various abbreviated names to their proper
     full names. This would then merge the chunks into a single
-    sequence. 
+    sequence.
 
     We preserve source document ordering between the variations
     on the name using the chunk sequence numbers.
-    
-    Here "prior to tangling" means either eagerly -- as each full name arrives -- 
+
+    Here "prior to tangling" means either eagerly -- as each full name arrives --
     or lazily -- after the entire Web is built.
-    
+
     We would no longer need to return a value from this function, either.
 
 @d Web add full chunk names...
@@ -2908,12 +2909,12 @@ This overall sequence is used for weaving the document.
 The ``addDefName()`` method is used to resolve this name if
 it is an abbreviation, or add it to the mapping if this
 is the first occurance of the name.  If the name cannot be
-added, an instance of our ``Error`` class is raised.  If the name exists or 
+added, an instance of our ``Error`` class is raised.  If the name exists or
 was added, the chunk is appended to the chunk list associated
 with this name.
 
 
-The Web's sequence counter is incremented, and this 
+The Web's sequence counter is incremented, and this
 unique sequence number sets the ``seq`` attribute of the ``Chunk``.
 If the chunk list was empty, this is the first chunk, the
 ``initial`` flag is set to True when there's only one element
@@ -2922,7 +2923,7 @@ in the list.  Otherwise, it's False.
 ..  note:: Improved use case.
 
     If we improve name resolution, then the if and exception can go away.
-    The ``addDefName()`` no longer needs to return a value. 
+    The ``addDefName()`` no longer needs to return a value.
 
 @d Web add a named macro chunk
 @{
@@ -2941,7 +2942,7 @@ def addNamed( self, chunk ):
         self.logger.debug( "Extending chunk {!r} from {!r}".format(nm, chunk.name) )
     else:
         raise Error("No full name for {!r}".format(chunk.name), chunk)
-@| addNamed 
+@| addNamed
 @}
 
 An output file definition ``Chunk`` is defined with an ``@@o``
@@ -2959,12 +2960,12 @@ This overall sequence is used for weaving the document.
 
 If the name does not exist in the ``output`` mapping,
 the name is added with an empty sequence of chunks.
-In all cases, the chunk is 
+In all cases, the chunk is
 appended to the chunk list associated
 with this name.
 
 
-The web's sequence counter is incremented, and this 
+The web's sequence counter is incremented, and this
 unique sequence number sets the Chunk's ``seq`` attribute.
 If the chunk list was empty, this is the first chunk, the
 ``initial`` flag is True if this is the first chunk.
@@ -3001,15 +3002,15 @@ Note that a Chunk name actually refers to a sequence
 of Chunk instances.  Multiple definitions for a Chunk are allowed, and
 all of the definitions are concatenated to create the complete
 Chunk.  This complexity makes it unwise to return the sequence
-of same-named Chunk; therefore, we put the burden on the Web to 
+of same-named Chunk; therefore, we put the burden on the Web to
 process all Chunk with a given name, in sequence.
 
 The ``fullNameFor()`` method resolves full name for a chunk as follows:
 
 1.  If the string is already in the ``named`` mapping, this is the full name
 
-2.  If the string ends in ``'...'``, visit each key in the dictionary 
-    to see if the key starts with the string up to the trailing ``'...'``.  
+2.  If the string ends in ``'...'``, visit each key in the dictionary
+    to see if the key starts with the string up to the trailing ``'...'``.
     If a match is found, the dictionary key is the full name.
 
 3.  Otherwise, treat this as a full name.
@@ -3025,7 +3026,7 @@ def fullNameFor( self, name ):
             if n.startswith( name[:-3] ) ]
         if len(best) > 1:
             raise Error("Ambiguous abbreviation {!r}, matches {!r}".format( name, list(sorted(best)) ) )
-        elif len(best) == 1: 
+        elif len(best) == 1:
             return best[0]
     return name
 @| fullNameFor
@@ -3040,7 +3041,7 @@ is unresolvable.
 It might be more helpful for debugging to emit this as an error in the
 weave and tangle results and keep processing.  This would allow an author to
 catch multiple errors in a single run of pyWeb.
- 
+
 @d Web Chunk name resolution...
 @{
 def getchunk( self, name ):
@@ -3066,21 +3067,21 @@ Each ``Chunk`` has a list ``Reference`` commands that shows the chunks
 to which a chunk refers.  These relationships must be reversed to show
 the chunks that refer to a given chunk.  This is done by traversing
 the entire web of named chunks and recording each chunk-to-chunk reference.
-This mapping has the referred-to chunk as 
+This mapping has the referred-to chunk as
 the key, and a sequence of referring chunks as the value.
 
 
 The accumulation is initiated by the web's ``createUsedBy()`` method.  This
-method visits a ``Chunk``, calling the ``genReferences()`` method, 
+method visits a ``Chunk``, calling the ``genReferences()`` method,
 passing in the ``Web`` instance
-as an argument.  Each ``Chunk`` class ``genReferences()`` method, in turn, 
+as an argument.  Each ``Chunk`` class ``genReferences()`` method, in turn,
 invokes the ``usedBy()`` method
-of each ``Command`` instance in the chunk.  Most commands do nothing, 
+of each ``Command`` instance in the chunk.  Most commands do nothing,
 but a ``ReferenceCommand``
 will resolve the name to which it refers.
 
 
-When the ``createUsedBy()`` method has accumulated the entire cross 
+When the ``createUsedBy()`` method has accumulated the entire cross
 reference, it also assures that all chunks are used exactly once.
 
 @d Web Chunk cross reference methods...
@@ -3128,7 +3129,7 @@ The one-pass version
             self.logger.error( "No definition for {!r}".format(nm) )
 
 
-We use three methods to filter chunk names into 
+We use three methods to filter chunk names into
 the various warning categories.  The ``no_reference`` list
 is a list of chunks defined by never referenced.
 The ``multi_reference`` list
@@ -3144,7 +3145,7 @@ def no_reference( self ):
 def multi_reference( self ):
     return [ nm for nm,cl in self.named.items() if len(cl)>0 and cl[0].refCount > 1 ]
 def no_definition( self ):
-    return [ nm for nm,cl in self.named.items() if len(cl) == 0 ] 
+    return [ nm for nm,cl in self.named.items() if len(cl) == 0 ]
 @| no_reference multi_reference no_definition
 @}
 
@@ -3173,12 +3174,12 @@ def chunkXref( self ):
 
 The ``userNamesXref()`` method creates a mapping for each
 user identifier.  The value for this mapping is a tuple
-with the chunk that defined the identifer (via a ``@@|`` command), 
-and a sequence of chunks that reference the identifier. 
+with the chunk that defined the identifer (via a ``@@|`` command),
+and a sequence of chunks that reference the identifier.
 
 
 For example:
-``{ 'Web': ( 87, (88,93,96,101,102,104) ), 'Chunk': ( 53, (54,55,56,60,57,58,59) ) }``, 
+``{ 'Web': ( 87, (88,93,96,101,102,104) ), 'Chunk': ( 53, (54,55,56,60,57,58,59) ) }``,
 shows that the identifier
 ``'Web'`` is defined in chunk with a sequence number of 87, and referenced
 in the sequence of chunks that follow.
@@ -3188,7 +3189,7 @@ This works in two passes:
 
 1.  ``_gatherUserId()`` gathers all user identifiers
 
-2.  ``_updateUserId()`` searches all text commands for the identifiers 
+2.  ``_updateUserId()`` searches all text commands for the identifiers
     and updates the ``Web`` class cross reference information.
 
 
@@ -3209,14 +3210,14 @@ def _updateUserId( self, chunkMap, ux ):
 @| userNamesXref _gatherUserId _updateUserId
 @}
 
-User identifiers are collected by visiting each of the sequence of 
+User identifiers are collected by visiting each of the sequence of
 ``Chunks`` that share the
 same name; within each component chunk, if chunk has identifiers assigned
 by the ``@@|`` command, these are seeded into the dictionary.
 If the chunk does not permit identifiers, it simply returns an empty
 list as a default action.
 
- 
+
 @d collect all user identifiers...
 @{
 for n,cList in chunkMap.items():
@@ -3225,10 +3226,10 @@ for n,cList in chunkMap.items():
             ux[id]= ( c.seq, [] )
 @}
 
-User identifiers are cross-referenced by visiting 
+User identifiers are cross-referenced by visiting
 each of the sequence of ``Chunks`` that share the
 same name; within each component chunk, visit each user identifier;
-if the ``Chunk`` class ``searchForRE()`` method matches an identifier, 
+if the ``Chunk`` class ``searchForRE()`` method matches an identifier,
 this is appended to the sequence of chunks that reference the original user identifier.
 
 
@@ -3249,30 +3250,30 @@ Loop Detection
 
 How do we assure that the web is a proper tree and doesn't contain any loops?
 
-Consider this example web 
+Consider this example web
 
 ..  parsed-literal::
 
     @@o example1 @@{
         @@<part 1A@@>
     @@}
-    
+
     @@d part 1A @@{
         @@<part 1B@@>
     @@}
-    
+
     @@d part 1B @@{
         @@<part 1A@@>
     @@}
-    
+
 All valid chunks are must be referenced from a ``@@o`` chunk, either directly,
-or indirectly via one or more ``@@<``\ *name*\ ``@@>`` references. This defines a 
+or indirectly via one or more ``@@<``\ *name*\ ``@@>`` references. This defines a
 proper tree with ``@@o`` at the root and children at each ``@@d``.
 
 Each chunk can have multiple references to further ``@@d`` definitions.
 No chunk can reference the ``@@o`` definition at the root.
 
-To be circular, two ``@@d`` chunks must reference each other.  
+To be circular, two ``@@d`` chunks must reference each other.
 
 To be valid, either (or both) must be named by the ``@@o``. There will, therefore,
 be two references: from the ``@@o`` and a ``@@d``. Our check for duplicate references will spot this.
@@ -3289,7 +3290,7 @@ One is to use command line parameters, another is to use the filename
 extension on the input file.
 
 We examine the first few characters of input.  A proper HTML, XHTML or
-XML file begins with '<!', '<?' or '<H'.  
+XML file begins with '<!', '<?' or '<H'.
 LaTeX files typically begin with '%' or '\'.
 Everything else is probably RST.
 
@@ -3300,15 +3301,15 @@ def language( self, preferredWeaverClass=None ):
     if preferredWeaverClass:
         return preferredWeaverClass()
     self.logger.debug( "Picking a weaver based on first chunk {!r}".format(self.chunkSeq[0][:4]) )
-    if self.chunkSeq[0].startswith('<'): 
+    if self.chunkSeq[0].startswith('<'):
         return HTML()
-    if self.chunkSeq[0].startswith('%') or self.chunkSeq[0].startswith('\\'):  
+    if self.chunkSeq[0].startswith('%') or self.chunkSeq[0].startswith('\\'):
         return LaTeX()
     return RST()
 @| language
 @}
 
-The ``tangle()`` method of the ``Web`` class performs 
+The ``tangle()`` method of the ``Web`` class performs
 the ``tangle()`` method for each ``Chunk`` of each
 named output file.  Note that several ``Chunks`` may share the file name, requiring
 the file be composed of material from each ``Chunk``, in order.
@@ -3360,14 +3361,14 @@ def weaveChunk( self, name, aWeaver ):
 The WebReader Class
 ~~~~~~~~~~~~~~~~~~~~~~
 
-There are two forms of the constructor for a ``WebReader``.  The 
+There are two forms of the constructor for a ``WebReader``.  The
 initial ``WebReader`` instance is created with code like the following:
 
 
 ..  parsed-literal::
 
     p= WebReader()
-    p.command = options.commandCharacter 
+    p.command = options.commandCharacter
 
 This will define the command character; usually provided as a command-line parameter to the application.
 
@@ -3380,7 +3381,7 @@ instance is created with code like the following:
 
 
 
-This will inherit the configuration from the parent ``WebReader``.  
+This will inherit the configuration from the parent ``WebReader``.
 This will also include a  reference from child to parent so that embedded Python expressions
 can view the entire input context.
 
@@ -3391,25 +3392,25 @@ These are assembled into ``Chunks``, and the ``Chunks`` are assembled into the d
 woven.
 
 
-"Structural" commands define the structure of the ``Chunks``.  The  structural commands 
-are ``@@d`` and ``@@o``, as well as the ``@@{``, ``@@}``, ``@@[``, ``@@]`` brackets, 
+"Structural" commands define the structure of the ``Chunks``.  The  structural commands
+are ``@@d`` and ``@@o``, as well as the ``@@{``, ``@@}``, ``@@[``, ``@@]`` brackets,
 and the ``@@i`` command to include another file.
 
 
-"Inline" commands are inline within a ``Chunk``: they define internal ``Commands``.  
+"Inline" commands are inline within a ``Chunk``: they define internal ``Commands``.
 Blocks of text are minor commands, as well as the ``@@<``\ *name*\ ``@@>`` references.
 The ``@@@@`` escape is also
 handled here so that all further processing is independent of any parsing.
 
-"Content" commands generate woven content. These include 
-the various cross-reference commands (``@@f``, ``@@m`` and ``@@u``).  
+"Content" commands generate woven content. These include
+the various cross-reference commands (``@@f``, ``@@m`` and ``@@u``).
 
 
 There are two class-level ``OptionParser`` instances used by this class.
 
 :output_option_parser:
     An ``OptionParser`` used to parse the ``@@o`` command.
-    
+
 :definition_option_parser:
     An ``OptionParser`` used to parse the ``@@d`` command.
 
@@ -3419,16 +3420,16 @@ The class has the following attributes:
     is the outer ``WebReader`` when processing a ``@@i`` command.
 
 :command:
-    is the command character; a WebReader will use the parent command 
+    is the command character; a WebReader will use the parent command
     character if the parent is not ``None``.
 
 :permitList:
-    is the list of commands that are permitted to fail.  This is generally 
+    is the list of commands that are permitted to fail.  This is generally
     an empty list or ``('@@i',)``.
 
 :_source:
     The open source being used by ``load()``.
-    
+
 :fileName:
     is used to pass the file name to the Web instance.
 
@@ -3438,10 +3439,10 @@ The class has the following attributes:
 :tokenizer:
     An instance of ``Tokenizer`` used to parse the input. This is built
     when ``load()`` is called.
-    
+
 :aChunk:
     is the current open Chunk being built.
-    
+
 :totalLines:
 :totalFiles:
     Summaries
@@ -3468,7 +3469,7 @@ class WebReader:
 
         # Configuration of this reader.
         self.parent= parent
-        if self.parent: 
+        if self.parent:
             self.command= self.parent.command
             self.permitList= self.parent.permitList
         else: # Defaults until overridden
@@ -3479,16 +3480,16 @@ class WebReader:
         self._source= None
         self.fileName= None
         self.theWeb= None
-            
+
         # State of reading and parsing.
         self.tokenizer= None
         self.aChunk= None
-        
+
         # Summary
         self.totalLines= 0
         self.totalFiles= 0
-        self.errors= 0 
-        
+        self.errors= 0
+
         @<WebReader command literals@>
     def __str__( self ):
         return self.__class__.__name__
@@ -3501,24 +3502,24 @@ Command recognition is done via a **Chain of Command**-like design.
 There are two conditions: the command string is recognized or it is not recognized.
 If the command is recognized, ``handleCommand()`` either:
 
-    -   (for "structural" commands) attaches the current ``Chunk`` (*self.aChunk*) to the 
+    -   (for "structural" commands) attaches the current ``Chunk`` (*self.aChunk*) to the
         current ``Web`` (*self.aWeb*), **or**
 
-    -   (for "inline" and "content" commands) create a ``Command``, attach it to the current 
+    -   (for "inline" and "content" commands) create a ``Command``, attach it to the current
         ``Chunk`` (*self.aChunk*)
 
 and returns a true result.
 
 If the command is not recognized, ``handleCommand()`` returns false.
 
-A subclass can override ``handleCommand()`` to 
+A subclass can override ``handleCommand()`` to
 
 (1) call this superclass version;
 
-(2) if the command is unknown to the superclass, 
+(2) if the command is unknown to the superclass,
     then the subclass can attempt to process it;
 
-(3) if the command is unknown to both classes, 
+(3) if the command is unknown to both classes,
     then return false.  Either a subclass will handle it, or the default activity taken
     by ``load()`` is to treat the command a text, but also issue a warning.
 
@@ -3562,7 +3563,7 @@ We'll use an ``OptionParser`` to locate the optional parameters.  This will then
 us build an appropriate instance of ``OutputChunk``.
 
 With some small additional changes, we could use ``OutputChunk( **options )``.
-    
+
 @d start an OutputChunk...
 @{
 args= next(self.tokenizer)
@@ -3572,18 +3573,18 @@ self.aChunk= OutputChunk( name=options['argument'],
         comment_start= options.get('start',None),
         comment_end= options.get('end',""),
         )
-self.aChunk.fileName= self.fileName 
+self.aChunk.fileName= self.fileName
 self.aChunk.webAdd( self.theWeb )
 # capture an OutputChunk up to @@}
 @}
 
 A named chunk has the form ``@@d`` *name* ``@@{`` *content* ``@@}`` for
 code and ``@@d`` *name* ``@@[`` *content* ``@@]`` for document source.
-We use the first two tokens to name the ``NamedChunk`` or ``NamedDocumentChunk``.  
+We use the first two tokens to name the ``NamedChunk`` or ``NamedDocumentChunk``.
 We expect either the ``@@{`` or ``@@[`` separator, and use the actual
 token found to choose which subclass of ``Chunk`` to create.
 We then attach all subsequent commands
-to this chunk while waiting for the final ``@@}`` or ``@@]`` token to 
+to this chunk while waiting for the final ``@@}`` or ``@@]`` token to
 end the chunk.
 
 We'll use an ``OptionParser`` to locate the optional parameter of ``-noindent``.
@@ -3591,8 +3592,8 @@ We'll use an ``OptionParser`` to locate the optional parameter of ``-noindent``.
 [Or possibly ``-indent`` *number*?]
 
 Then we can use options to create an appropriate subclass of ``NamedChunk``.
-        
-If "-indent" is in options, this is the default. 
+
+If "-indent" is in options, this is the default.
 If both are in the options, we can provide a warning, I guess.
 
     **TODO** Add a warning for conflicting options.
@@ -3616,7 +3617,7 @@ elif brack == None:
 else:
     raise Error( "Design Error" )
 
-self.aChunk.fileName= self.fileName 
+self.aChunk.fileName= self.fileName
 self.aChunk.webAdd( self.theWeb )
 # capture a NamedChunk up to @@} or @@]
 @}
@@ -3629,18 +3630,18 @@ This permits file names with embedded spaces. It also permits arguments and opti
 if really necessary.
 
 Once we have split the file name away from the rest of the following anonymous chunk,
-we push the following token back into the token stream, so that it will be the 
+we push the following token back into the token stream, so that it will be the
 first token examined at the top of the ``load()`` loop.
 
-We create a child ``WebReader`` instance to process the included file.  The entire file 
+We create a child ``WebReader`` instance to process the included file.  The entire file
 is loaded into the current ``Web`` instance.  A new, empty ``Chunk`` is created at the end
 of the file so that processing can resume with an anonymous ``Chunk``.
 
 The reader has a ``permitList`` attribute.
 This lists any commands where failure is permitted.  Currently, only the ``@@i`` command
 can be set to permit failure; this allows a ``.w`` to include
-a file that does not yet exist.  
- 
+a file that does not yet exist.
+
 The primary use case for this feature is when weaving test output.
 The first pass of **pyWeb** tangles the program source files; they are
 then run to create test output; the second pass of **pyWeb** weaves this
@@ -3657,16 +3658,16 @@ try:
     self.totalFiles += include.totalFiles
     if include.errors:
         self.errors += include.errors
-        self.logger.error( 
+        self.logger.error(
             "Errors in included file {!s}, output is incomplete.".format(
             incFile) )
 except Error as e:
-    self.logger.error( 
+    self.logger.error(
         "Problems with included file {!s}, output is incomplete.".format(
         incFile) )
     self.errors += 1
 except IOError as e:
-    self.logger.error( 
+    self.logger.error(
         "Problems with included file {!s}, output is incomplete.".format(
         incFile) )
     # Discretionary -- sometimes we want to continue
@@ -3681,7 +3682,7 @@ text is therefore part of an anonymous chunk.
 
 
 Note that no check is made to assure that the previous ``Chunk`` was indeed a named
-chunk or output chunk started with ``@@{`` or ``@@[``.  
+chunk or output chunk started with ``@@{`` or ``@@[``.
 To do this, an attribute would be
 needed for each ``Chunk`` subclass that indicated if a trailing bracket was necessary.
 For the base ``Chunk`` class, this would be false, but for all other subclasses of
@@ -3695,7 +3696,7 @@ self.aChunk.webAdd( self.theWeb )
 @}
 
 The following sequence of ``elif`` statements identifies
-the minor commands that add ``Command`` instances to the current open ``Chunk``. 
+the minor commands that add ``Command`` instances to the current open ``Chunk``.
 
 
 @d minor commands...
@@ -3719,7 +3720,7 @@ elif token[:2] == self.cmdcmd:
 User identifiers occur after a ``@@|`` in a ``NamedChunk``.
 
 Note that no check is made to assure that the previous ``Chunk`` was indeed a named
-chunk or output chunk started with ``@@{``.  
+chunk or output chunk started with ``@@{``.
 To do this, an attribute would be
 needed for each ``Chunk`` subclass that indicated if user identifiers are permitted.
 For the base ``Chunk`` class, this would be false, but for the ``NamedChunk`` class and
@@ -3728,7 +3729,7 @@ For the base ``Chunk`` class, this would be false, but for the ``NamedChunk`` cl
 User identifiers are name references at the end of a NamedChunk
 These are accumulated and expanded by ``@@u`` reference
 
-@d assign user identifiers... 
+@d assign user identifiers...
 @{
 try:
     self.aChunk.setUserIDRefs( next(self.tokenizer).strip() )
@@ -3753,13 +3754,13 @@ self.aChunk.appendText( "", self.tokenizer.lineNumber ) # to collect following t
 self.logger.debug( "Reading {!r} {!r}".format(expand, closing) )
 @}
 
-An expression command has the form ``@@(``\ *Python Expression*\ ``@@)``.  
+An expression command has the form ``@@(``\ *Python Expression*\ ``@@)``.
 We accept three
 tokens from the input, the middle token is the expression.
 
 There are two alternative semantics for an embedded expression.
 
--   **Deferred Execution**.  This requires definition of a new subclass of ``Command``, 
+-   **Deferred Execution**.  This requires definition of a new subclass of ``Command``,
     ``ExpressionCommand``, and appends it into the current ``Chunk``.  At weave and
     tangle time, this expression is evaluated.  The insert might look something like this:
     ``aChunk.append( ExpressionCommand(expression, self.tokenizer.lineNumber) )``.
@@ -3773,7 +3774,7 @@ We use the **Immediate Execution** semantics.
 Note that we've removed the blanket ``os``.  We only provide ``os.path``.
 An ``os.getcwd()`` must be changed to ``os.path.realpath('.')``.
 
-@d Imports... 
+@d Imports...
 @{
 import builtins
 import sys
@@ -3788,11 +3789,11 @@ expression= next(self.tokenizer)
 self.expect( (self.cmdrexpr,) )
 try:
     # Build Context
-    safe= types.SimpleNamespace( **dict( (name,obj) 
-        for name,obj in builtins.__dict__.items() 
+    safe= types.SimpleNamespace( **dict( (name,obj)
+        for name,obj in builtins.__dict__.items()
         if name not in ('eval', 'exec', 'open', '__import__')))
     globals= dict(
-        __builtins__= safe, 
+        __builtins__= safe,
         os= types.SimpleNamespace(path=os.path),
         datetime= datetime,
         platform= platform,
@@ -3812,13 +3813,13 @@ self.aChunk.appendText( result, self.tokenizer.lineNumber )
 @}
 
 A double command sequence (``'@@@@'``, when the command is an ``'@@'``) has the
-usual meaning of ``'@@'`` in the input stream.  We do this via 
-the ``appendText()`` method of the current ``Chunk``.  This will append the 
+usual meaning of ``'@@'`` in the input stream.  We do this via
+the ``appendText()`` method of the current ``Chunk``.  This will append the
 character on the end of the most recent ``TextCommand``; if this fails, it will
 create a new, empty ``TextCommand``.
 
 We replace with '@@' here and now! This is put this at the end of the previous chunk.
-And we make sure the next chunk will be appended to this so that it's 
+And we make sure the next chunk will be appended to this so that it's
 largely seamless.
 
 @d double at-sign...
@@ -3826,9 +3827,9 @@ largely seamless.
 self.aChunk.appendText( self.command, self.tokenizer.lineNumber )
 @}
 
-The ``expect()`` method examines the 
-next token to see if it is the expected item. ``'\n'`` are absorbed.  
-If this is not found, a standard type of error message is raised. 
+The ``expect()`` method examines the
+next token to see if it is the expected item. ``'\n'`` are absorbed.
+If this is not found, a standard type of error message is raised.
 This is used by ``handleCommand()``.
 
 @d WebReader handle a command...
@@ -3851,7 +3852,7 @@ def expect( self, tokens ):
 @}
 
 The ``location()`` provides the file name and line number.
-This allows error messages as well as tangled or woven output 
+This allows error messages as well as tangled or woven output
 to correctly reference the original input files.
 
 @d WebReader location...
@@ -3869,7 +3870,7 @@ and placed in the ``Web``.  If ``handleCommand()`` returns a False result, the c
 was unknown, and we write a warning but treat it as text.
 
 The ``load()`` method is used recursively to handle the ``@@i`` command. The issue
-is that it's always loading a single top-level web. 
+is that it's always loading a single top-level web.
 
 @d WebReader load...
 @{
@@ -3881,14 +3882,14 @@ def load( self, web, filename, source=None ):
     # This should be a setter property of the web.
     if self.theWeb.webFileName is None:
         self.theWeb.webFileName= self.fileName
-    
+
     if source:
         self._source= source
         self.parse_source()
     else:
         with open( self.fileName, "r" ) as self._source:
             self.parse_source()
-        
+
 def parse_source( self ):
         self.tokenizer= Tokenizer( self._source, self.command )
         self.totalFiles += 1
@@ -3912,7 +3913,7 @@ def parse_source( self ):
 The command character can be changed to permit
 some flexibility when working with languages that make extensive
 use of the ``@@`` symbol, i.e., PERL.
-The initialization of the ``WebReader`` is based on the selected 
+The initialization of the ``WebReader`` is based on the selected
 command character.
 
 
@@ -3952,7 +3953,7 @@ into a stream of tokens. There are two broad classes of tokens:
     commands.
 
 -   ``\n``. Inside text, these matter. Within structure command tokens, these don't matter.
-    Except after the filename after an ``@@i`` command, where it ends the command. 
+    Except after the filename after an ``@@i`` command, where it ends the command.
 
 -   The remaining text.
 
@@ -3961,11 +3962,11 @@ The ``split()`` method of the Python ``re`` module will separate the input
 and preserve the actual character sequence on which the input was split.
 This breaks the input into blocks of text separated by the ``@@.`` characters.
 
-This tokenizer splits the input using ``(r'@@.|\n')``. The idea is that 
-we locate commands, newlines and the interstitial text as three classes of tokens.  
+This tokenizer splits the input using ``(r'@@.|\n')``. The idea is that
+we locate commands, newlines and the interstitial text as three classes of tokens.
 We can then assemble each ``Command`` instance from a short sequence of tokens.
 The core ``TextCommand`` and ``CodeCommand`` will be a line of text ending with
-the ``\n``. 
+the ``\n``.
 
 The re.split() method will include an empty string when the split pattern occurs
 at the very beginning or very end of the input. For example:
@@ -3974,7 +3975,7 @@ at the very beginning or very end of the input. For example:
 
     >>> pat.split( "@@{hi mom@@}")
     ['', '@@{', 'hi mom', '@@}', '']
-    
+
 We can safely filter these via a generator expression.
 
 The tokenizer counts newline characters for us, so that error messages can include
@@ -4013,20 +4014,20 @@ The Option Parser Class
 For some commands (``@@d`` and ``@@o``) we have options as well as the chunk name
 or file name. This roughly parallels the way Tcl or the shell works.
 
-The two examples are 
+The two examples are
 
--   ``@@o`` which has an optional ``-start`` and ``-end`` that are used to 
+-   ``@@o`` which has an optional ``-start`` and ``-end`` that are used to
     provide comment bracketing information. For example:
-    
+
     ``@@0 -start /* -end */ something.css``
-    
+
     Provides two options in addition to the required filename.
-    
+
 -   ``@@d`` which has an optional ``-noident`` or ``-indent`` that is used to
-    provide the indentation rules for this chunk. Some chunks are not indented 
+    provide the indentation rules for this chunk. Some chunks are not indented
     automatically. It's up to the author to get the indentation right. This is
     used in the case of a Python """ string that would be ruined by indentation.
-    
+
 To handle this, we have a separate lexical scanner and parser for these
 two commands.
 
@@ -4047,7 +4048,7 @@ Here's how we can define an option.
         OptionDef( "-noindent", nargs=0 ),
         OptionDef( "argument", nargs='*' ),
         )
-        
+
 The idea is to parallel ``argparse.add_argument()`` syntax.
 
 @d Option Parser class...
@@ -4058,7 +4059,7 @@ class OptionDef:
         self.__dict__.update( kw )
 @}
 
-The parser breaks the text into words using ``shelex`` rules. 
+The parser breaks the text into words using ``shelex`` rules.
 It then steps through the words, accumulating the options and the
 final argument value.
 
@@ -4082,13 +4083,13 @@ class OptionParser:
                 if option:
                     yield option, value
                 try:
-                    final= [next(word_iter)] 
+                    final= [next(word_iter)]
                 except StopIteration:
                     final= [] # Special case of '--' at the end.
                 break
             elif word.startswith('-'):
                 if word in self.args:
-                    if option: 
+                    if option:
                         yield option, value
                     option, value = word, []
                 else:
@@ -4099,7 +4100,7 @@ class OptionParser:
                         yield option, value
                         final= [word]
                         break
-                    else:                
+                    else:
                         value.append( word )
                 else:
                     final= [word]
@@ -4127,17 +4128,17 @@ Then we'd have a loop something like this. (Untested, incomplete, just hand-wavi
             final= 0
             trailers.pop(0)
     yield trailers[0], " ".join(final)
-    
+
 Action Class Hierarchy
 -----------------------
 
-This application performs three major actions: loading the document web, 
+This application performs three major actions: loading the document web,
 weaving and tangling.  Generally,
 the use case is to perform a load, weave and tangle.  However, a less common use case
-is to first load and tangle output files, run a regression test and then 
+is to first load and tangle output files, run a regression test and then
 load and weave a result that includes the test output file.
 
-The ``-x`` option excludes one of the two output actions.  The ``-xw`` 
+The ``-x`` option excludes one of the two output actions.  The ``-xw``
 excludes the weave pass, doing only the tangle action.  The ``-xt`` excludes
 the tangle pass, doing the weave action.
 
@@ -4157,21 +4158,21 @@ This two pass action might be embedded in the following type of Python program.
 The first step runs **pyWeb**, excluding the final weaving pass.  The second
 step runs the tangled program, ``source.py``, and produces test results in
 some log file, ``source.log``.  The third step runs pyWeb excluding the
-tangle pass.  This produces a final document that includes the ``source.log`` 
+tangle pass.  This produces a final document that includes the ``source.log``
 test results.
 
 
 To accomplish this, we provide a class hierarchy that defines the various
-actions of the pyWeb application.  This class hierarchy defines an extensible set of 
+actions of the pyWeb application.  This class hierarchy defines an extensible set of
 fundamental actions.  This gives us the flexibility to create a simple sequence
-of actions and execute any combination of these.  It eliminates the need for a 
+of actions and execute any combination of these.  It eliminates the need for a
 forest of ``if``-statements to determine precisely what will be done.
 
 Each action has the potential to update the state of the overall
 application.   A partner with this command hierarchy is the Application class
-that defines the application options, inputs and results. 
+that defines the application options, inputs and results.
 
-@d Action class hierarchy... 
+@d Action class hierarchy...
 @{
 @<Action superclass has common features of all actions@>
 @<ActionSequence subclass that holds a sequence of other actions@>
@@ -4192,7 +4193,7 @@ The overall process of the application is defined by an instance of ``Action``.
 This instance may be the ``WeaveAction`` instance, the ``TangleAction`` instance
 or a ``ActionSequence`` instance.
 
-The instance is constructed during parsing of the input parameters.  Then the 
+The instance is constructed during parsing of the input parameters.  Then the
 ``Action`` class ``perform()`` method is called to actually perform the
 action.  There are three standard ``Action`` instances available: an instance
 that is a macro and does both tangling and weaving, an instance that excludes tangling,
@@ -4211,19 +4212,19 @@ An ``Action`` has a number of common attributes.
 
 :name:
     A name for this action.
-    
+
 :options:
     The ``argparse.Namespace`` object.
-    
+
 :web:
     The current web that's being processed.
-    
+
 !start:
     The time at which the action started.
 
 
 
-@d Action superclass... 
+@d Action superclass...
 @{
 class Action:
     """An action performed by pyWeb."""
@@ -4241,10 +4242,10 @@ class Action:
 @}
 
 The ``__call__()`` method does the real work of the action.
-For the superclass, it merely logs a message.  This is overridden 
+For the superclass, it merely logs a message.  This is overridden
 by a subclass.
 
-@d Action call... 
+@d Action call...
 @{
 def __call__( self ):
     self.logger.info( "Starting {!s}".format(self.name) )
@@ -4269,19 +4270,19 @@ ActionSequence Class
 ~~~~~~~~~~~~~~~~~~~~
 
 A ``ActionSequence`` defines a composite action; it is a sequence of
-other actions.  When the macro is performed, it delegates to the 
+other actions.  When the macro is performed, it delegates to the
 sub-actions.
 
 The instance is created during parsing of input parameters.  An instance of
 this class is one of
-the three standard actions available; it generally is the default, "do everything" 
+the three standard actions available; it generally is the default, "do everything"
 action.
 
 This class overrides the ``perform()`` method of the superclass.  It also adds
 an ``append()`` method that is used to construct the sequence of actions.
 
 
-@d ActionSequence subclass... 
+@d ActionSequence subclass...
 @{
 class ActionSequence( Action ):
     """An action composed of a sequence of other actions."""
@@ -4302,7 +4303,7 @@ it is possible to short-cut argument processing by using the Python
 ``*args`` construct to accept all arguments and pass them to each
 sub-action.
 
-@d ActionSequence call... 
+@d ActionSequence call...
 @{
 def __call__( self ):
     for o in self.opSequence:
@@ -4312,7 +4313,7 @@ def __call__( self ):
 @| perform
 @}
 
-Since this class is essentially a wrapper around the built-in sequence type, 
+Since this class is essentially a wrapper around the built-in sequence type,
 we delegate sequence related actions directly to the underlying sequence.
 
 @d ActionSequence append... @{
@@ -4367,9 +4368,9 @@ is never defined.
 @d WeaveAction call... @{
 def __call__( self ):
     super().__call__()
-    if not self.options.theWeaver: 
+    if not self.options.theWeaver:
         # Examine first few chars of first chunk of web to determine language
-        self.options.theWeaver= self.web.language() 
+        self.options.theWeaver= self.web.language()
         self.logger.info( "Using {0}".format(self.options.theWeaver.__class__.__name__) )
     self.options.theWeaver.reference_style= self.options.reference_style
     try:
@@ -4390,7 +4391,7 @@ statistics for the weave action.
 @d WeaveAction summary... @{
 def summary( self ):
     if self.options.theWeaver and self.options.theWeaver.linesWritten > 0:
-        return "{!s} {:d} lines in {:0.2f} sec.".format( self.name, 
+        return "{!s} {:d} lines in {:0.2f} sec.".format( self.name,
         self.options.theWeaver.linesWritten, self.duration() )
     return "did not {!s}".format( self.name, )
 @| summary
@@ -4420,7 +4421,7 @@ class TangleAction( Action ):
 @}
 
 Tangling can only raise an exception when a cross reference request (``@@f``, ``@@m`` or ``@@u``)
-occurs in a program code chunk.  Program code chunks are defined 
+occurs in a program code chunk.  Program code chunks are defined
 with any of ``@@d`` or ``@@o``  and use ``@@{`` ``@@}`` brackets.
 
 
@@ -4431,7 +4432,7 @@ def __call__( self ):
     try:
         self.web.tangle( self.options.theTangler )
     except Error as e:
-        self.logger.error( 
+        self.logger.error(
             "Problems tangling outputs from {!r} (tangle files are faulty).".format(
             self.web.webFileName) )
         #raise
@@ -4444,7 +4445,7 @@ statistics for the tangle action.
 @d TangleAction summary... @{
 def summary( self ):
     if self.options.theTangler and self.options.theTangler.linesWritten > 0:
-        return "{!s} {:d} lines in {:0.2f} sec.".format( self.name, 
+        return "{!s} {:d} lines in {:0.2f} sec.".format( self.name,
         self.options.theTangler.totalLines, self.duration() )
     return "did not {!r}".format( self.name, )
 @| summary
@@ -4477,10 +4478,10 @@ class LoadAction( Action ):
 @| LoadAction
 @}
 
-Trying to load the web involves two steps, either of which can raise 
+Trying to load the web involves two steps, either of which can raise
 exceptions due to incorrect inputs.
 
-1.  The ``WebReader`` class ``load()`` method can raise exceptions for a number of 
+1.  The ``WebReader`` class ``load()`` method can raise exceptions for a number of
     syntax errors as well as OS errors.
 
     -     Missing closing brackets (``@@}``, ``@@]`` or ``@@>``).
@@ -4493,7 +4494,7 @@ exceptions due to incorrect inputs.
 
     -     The input file does not exist or is not readable.
 
-2.  The ``Web`` class ``createUsedBy()`` method can raise an exception when a 
+2.  The ``Web`` class ``createUsedBy()`` method can raise an exception when a
     chunk reference cannot be resolved to a named chunk.
 
 @d LoadAction call... @{
@@ -4501,7 +4502,7 @@ def __call__( self ):
     super().__call__()
     self.webReader= self.options.webReader
     self.webReader.command= self.options.command
-    self.webReader.permitList= self.options.permitList 
+    self.webReader.permitList= self.options.permitList
     self.web.webFileName= self.options.webFileName
     error= "Problems with source file {!r}, no output produced.".format(
             self.options.webFileName)
@@ -4513,7 +4514,7 @@ def __call__( self ):
         self.web.createUsedBy()
         if self.webReader.errors != 0:
             self.logger.error( error )
-            raise Error( "Internal Reference Errors in the Web" )        
+            raise Error( "Internal Reference Errors in the Web" )
     except Error as e:
         self.logger.error(error)
         raise # Older design.
@@ -4528,8 +4529,8 @@ statistics for the load action.
 
 @d LoadAction summary... @{
 def summary( self ):
-    return "{!s} {:d} lines from {:d} files in {:0.2f} sec.".format( 
-        self.name, self.webReader.totalLines, 
+    return "{!s} {:d} lines from {:d} files in {:0.2f} sec.".format(
+        self.name, self.webReader.totalLines,
         self.webReader.totalFiles, self.duration() )
 @| summary
 @}
@@ -4540,7 +4541,7 @@ def summary( self ):
 
 The **pyWeb** application file is shown below:
 
-@o pyweb.py 
+@o pyweb.py
 @{@<Overheads@>
 @<Imports@>
 @<Base Class Definitions@>
@@ -4572,7 +4573,7 @@ The more important elements are described in separate sections:
 Python Library Imports
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Numerous Python library modules are used by this application. 
+Numerous Python library modules are used by this application.
 
 A few are listed here because they're used widely. Others are listed
 closer to where they're referenced.
@@ -4582,9 +4583,9 @@ closer to where they're referenced.
     times.
 
 -   The ``time`` module provides a handy current-time string; this is used
-    to by the HTML Weaver to write a closing timestamp on generated HTML files, 
+    to by the HTML Weaver to write a closing timestamp on generated HTML files,
     as well as log messages.
-    
+
 -   The ``datetime`` module is used to format times, phasing out use of ``time``.
 
 -   The ``types`` module is used to get at ``SimpleNamespace`` for configuration.
@@ -4610,7 +4611,7 @@ The shell escape is provided so that the user can define this
 file as executable, and launch it directly from their shell.
 The shell reads the first line of a file; when it finds the ``'#!'`` shell
 escape, the remainder of the line is taken as the path to the binary program
-that should be run.  The shell runs this binary, providing the 
+that should be run.  The shell runs this binary, providing the
 file as standard input.
 
 
@@ -4620,15 +4621,15 @@ file as standard input.
 
 A Python ``__doc__`` string provides a standard vehicle for documenting
 the module or the application program.  The usual style is to provide
-a one-sentence summary on the first line.  This is followed by more 
+a one-sentence summary on the first line.  This is followed by more
 detailed usage information.
 
 
-@d Overheads 
+@d Overheads
 @{"""pyWeb Literate Programming - tangle and weave tool.
 
-Yet another simple literate programming tool derived from nuweb, 
-implemented entirely in Python.  
+Yet another simple literate programming tool derived from nuweb,
+implemented entirely in Python.
 This produces any markup for any programming language.
 
 Usage:
@@ -4649,7 +4650,7 @@ Options:
     -rs          Simple references (default)
     -n           Include line number comments in the tangled source; requires
                  comment start and stop on the @@o commands.
-        
+
     file.w       The input file, with @@o, @@d, @@i, @@[, @@{, @@|, @@<, @@f, @@m, @@u commands.
 """
 @}
@@ -4659,7 +4660,7 @@ a Python module so it is preserved.  See PEP (Python Enhancement Proposal) #8 fo
 on recommended styles.
 
 
-We also sneak in a "DO NOT EDIT" warning that belongs in all generated application 
+We also sneak in a "DO NOT EDIT" warning that belongs in all generated application
 source files.
 
 @d Overheads
@@ -4676,7 +4677,7 @@ The Application Class
 -----------------------
 
 The ``Application`` class is provided so that the ``Action`` instances
-have an overall application to update.  This allows the ``WeaveAction`` to 
+have an overall application to update.  This allows the ``WeaveAction`` to
 provide the selected ``Weaver`` instance to the application.  It also provides a
 central location for the various options and alternatives that might be accepted from
 the command line.
@@ -4685,7 +4686,7 @@ the command line.
 The constructor creates a default ``argparse.Namespace`` with values
 suitable for weaving and tangling.
 
-The ``parseArgs()`` method uses the ``sys.argv`` sequence to 
+The ``parseArgs()`` method uses the ``sys.argv`` sequence to
 parse the command line arguments and update the options.  This allows a
 program to pre-process the arguments, passing other arguments to this module.
 
@@ -4703,11 +4704,11 @@ For example:
 ..  parsed-literal::
 
     import pyweb, argparse
-    
+
     p= argparse.ArgumentParser()
     *argument definition*
     config = p.parse_args()
-    
+
     a= pyweb.Application()
     *Configure the Application based on options*
     a.process( config )
@@ -4737,7 +4738,7 @@ class Application:
 @| Application
 @}
 
-The first part of parsing the command line is 
+The first part of parsing the command line is
 setting default values that apply when parameters are omitted.
 The default values are set as follows:
 
@@ -4747,7 +4748,7 @@ The default values are set as follows:
 :webReader:
     is the ``WebReader`` instance created for the current
     input file.
- 
+
 :doWeave:
     instance of ``Action``
     that does weaving only.
@@ -4755,70 +4756,70 @@ The default values are set as follows:
 :doTangle:
     instance of ``Action``
     that does tangling only.
-    
+
 :theAction:
     is an instance of ``Action`` that describes
     the default overall action: load, tangle and weave.  This is the default unless
     overridden by an option.
-    
+
 Here are the configuration values. These are attributes
 of the ``argparse.namespace`` default as well as the updated
 namespace returned by ``parseArgs()``.
 
 :verbosity:
     Either ``logging.INFO``, ``logging.WARN`` or ``logging.DEBUG``
-    
+
 :command:
     is set to ``@@`` as the  default command introducer.
 
 :permit:
     The raw list of permitted command characters, perhaps ``'i'``.
-    
+
 :permitList:
     provides a list of commands that are permitted
     to fail.  Typically this is empty, or contains ``@@i`` to allow the include
     command to fail.
 
 :files:
-    is the final list of argument files from the command line; 
+    is the final list of argument files from the command line;
     these will be processed unless overridden in the call to ``process()``.
 
 !skip:
     a list of steps to skip: perhaps ``'w'`` or ``'t'`` to skip weaving or tangling.
-    
+
 :weaver:
     the short name of the weaver.
-    
+
 :theTangler:
-    is set to a ``TanglerMake`` instance 
+    is set to a ``TanglerMake`` instance
     to create the output files.
 
 :theWeaver:
     is set to an instance of a subclass of ``Weaver`` based on ``weaver``
 
 Other instance variables.
-   
+
 Here's the global list of available weavers. Essentially this is the subclass
 list of ``Weaver``.  Essentially, the list is this:
 
 ..  parsed-literal::
 
-    weavers = dict( 
-        (x.__class__.__name__.lower(), x) 
+    weavers = dict(
+        (x.__class__.__name__.lower(), x)
         for x in Weaver.__subclasses__()
     )
 
 Rather than automate this, and potentially expose elements of the class hierarchy
-that aren't really meant to be used, we provide a manually-developed list. 
+that aren't really meant to be used, we provide a manually-developed list.
 
-@d Application Class... 
+@d Application Class...
 @{
 # Global list of available weaver classes.
 weavers = {
     'html':  HTML,
     'htmlshort': HTMLShort,
     'latex': LaTeX,
-    'rst': RST, 
+    'rst': RST,
 }
 @}
 
@@ -4830,7 +4831,7 @@ on these simple text values to create more useful objects.
 self.defaults= argparse.Namespace(
     verbosity= logging.INFO,
     command= '@@',
-    weaver= 'rst', 
+    weaver= 'rst',
     skip= '', # Don't skip any steps
     permit= '', # Don't tolerate missing includes
     reference= 's', # Simple references
@@ -4874,13 +4875,13 @@ def parseArgs( self ):
     config= p.parse_args( namespace=self.defaults )
     self.expand( config )
     return config
-    
+
 def expand( self, config ):
     """Translate the argument values from simple text to useful objects.
     Weaver. Tangler. WebReader.
     """
     if config.reference == 't':
-        config.reference_style = TransitiveReference() 
+        config.reference_style = TransitiveReference()
     elif config.reference == 's':
         config.reference_style = SimpleReference()
     else:
@@ -4895,9 +4896,9 @@ def expand( self, config ):
         if not issubclass(weaver_class, Weaver):
             raise TypeError( "{0!r} not a subclass of Weaver".format(weaver_class) )
     config.theWeaver= weaver_class()
-    
+
     config.theTangler= TanglerMake()
-    
+
     if config.permit:
         # save permitted errors, usual case is ``-pi`` to permit ``@@i`` include errors
         config.permitList= [ '{!s}{!s}'.format( config.command, c ) for c in config.permit ]
@@ -4917,20 +4918,20 @@ to process each file as follows:
 1.  Create a new ``WebReader`` for the ``Application``, providing
     the parameters required to process the input file.
 
-2.  Create a ``Web`` instance, *w* 
+2.  Create a ``Web`` instance, *w*
     and set the Web's *sourceFileName* from the WebReader's *fileName*.
 
-3.  Perform the given command, typically a ``ActionSequence``, 
+3.  Perform the given command, typically a ``ActionSequence``,
     which does some combination of load, tangle the output files and
     weave the final document in the target language; if
     necessary, examine the ``Web`` to determine the documentation language.
 
 4.  Print a performance summary line that shows lines processed per second.
 
-In the event of failure in any of the major processing steps, 
-a summary message is produced, to clarify the state of 
+In the event of failure in any of the major processing steps,
+a summary message is produced, to clarify the state of
 the output files, and the exception is reraised.
-The re-raising is done so that all exceptions are handled by the 
+The re-raising is done so that all exceptions are handled by the
 outermost main program.
 
 @d Application class process all...
@@ -4938,12 +4939,12 @@ outermost main program.
 def process( self, config ):
     root= logging.getLogger()
     root.setLevel( config.verbosity )
-    self.logger.debug( "Setting root log level to {!r}".format( 
+    self.logger.debug( "Setting root log level to {!r}".format(
         logging.getLevelName(root.getEffectiveLevel()) ) )
-    
+
     if config.command:
         self.logger.debug( "Command character {!r}".format(config.command) )
-        
+
     if config.skip:
         if config.skip.lower().startswith('w'): # not weaving == tangling
             self.theAction= self.doTangle
@@ -4968,7 +4969,7 @@ def process( self, config ):
 Logging Setup
 --------------
 
-We'll create a logging context manager. This allows us to wrap the ``main()`` 
+We'll create a logging context manager. This allows us to wrap the ``main()``
 function in an explicit ``with`` statement that assures that logging is
 configured and cleaned up politely.
 
@@ -4983,7 +4984,7 @@ This has two configuration approaches. If a positional argument is given,
 that dictionary is used for ``logging.config.dictConfig``. Otherwise,
 keyword arguments are provided to ``logging.basicConfig``.
 
-A subclass might properly load a dictionary 
+A subclass might properly load a dictionary
 encoded in YAML and use that with ``logging.config.dictConfig``.
 
 @d Logging Setup
@@ -5003,7 +5004,7 @@ class Logger:
         return False
 @}
 
-Here's a sample logging setup. This creates a simple console handler and 
+Here's a sample logging setup. This creates a simple console handler and
 a formatter that matches the ``basicConfig`` formatter.
 
 It defines the root logger plus two overrides for class loggers that might be
@@ -5027,9 +5028,9 @@ log_config= dict(
             'style': "{",
         }
     },
-    
+
     root= { 'handlers': ['console'], 'level': logging.INFO, },
-    
+
     #For specific debugging support...
     loggers= {
     #    'RST': { 'level': logging.DEBUG },
@@ -5084,7 +5085,7 @@ This can be extended by doing something like the following.
     import pyweb
     class MyWeaver( HTML ):
        *Any template changes*
-     
+
     pyweb.weavers['myweaver']= MyWeaver()
     pyweb.main()
 

@@ -1,17 +1,25 @@
+Cloned version from [slott56's repo](https://github.com/slott56/py-web-tool).
+I fixed several bugs in the codebase and tried to improve some aspects which
+personally serve for my blogging.
+
+- FIXED: errors when loading the `srarr` and `loz` symbols.
+
+------------------------------------------------------------------------------
+
 pyWeb 3.0: In Python, Yet Another Literate Programming Tool
 
 Literate programming is an attempt to reconcile the opposing needs
-of clear presentation to people with the technical issues of 
+of clear presentation to people with the technical issues of
 creating code that will work with our current set of tools.
 
 Presentation to people requires extensive and sophisticated typesetting
-techniques.  Further, the "narrative arc" of a presentation may not 
+techniques.  Further, the "narrative arc" of a presentation may not
 follow the source code as layed out for the compiler.
 
 pyWeb is a literate programming tool based on Knuth's Web to combine the actions
 of weaving a document with tangling source files.
 It is independent of any particular document markup or source language.
-Is uses a simple set of markup tags to define chunks of code and 
+Is uses a simple set of markup tags to define chunks of code and
 documentation.
 
 The ``pyweb.w`` file is the source for the various pyweb module and script files.
@@ -54,19 +62,19 @@ You can then run pyweb with
 
 ::
 
-    python3 -m pyweb pyweb.w 
+    python3 -m pyweb pyweb.w
 
 This will create the various output files from the source .w file.
 
 -   ``pyweb.html`` is the final woven document.
 
--   ``pyweb.py``, ``tangle.py``, ``weave.py``, ``README``, ``setup.py`` and ``MANIFEST.in`` 
+-   ``pyweb.py``, ``tangle.py``, ``weave.py``, ``README``, ``setup.py`` and ``MANIFEST.in``
 	``.nojekyll`` and ``index.html`` are tangled output files.
 
 Testing
 -------
 
-The test directory includes ``pyweb_test.w``, which will create a 
+The test directory includes ``pyweb_test.w``, which will create a
 complete test suite.
 
 This weaves a ``pyweb_test.html`` file.
